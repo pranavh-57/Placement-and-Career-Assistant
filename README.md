@@ -137,17 +137,6 @@ Watch the **Agent Activity** panel on the right at any time — it's a live
 trace of which agent acted, what it did, and (for MCP calls) which tool
 was actually invoked.
 
-## Extending it
-
-- **Add an MCP tool**: create a new `FastMCP` server under `mcp_tools/`,
-  add a client function in `mcp_client.py`, and call it from an agent or
-  from the orchestrator's router.
-- **Add a document type to RAG**: call `add_document(text, source,
-  doc_type)` from `rag/vector_store.py` — the interview, learning, and
-  matching agents already filter retrieval by `doc_type`.
-- **Calendar/task integration** (optional per the original spec): add a
-  third MCP server following the same `FastMCP` + stdio pattern as
-  `job_search_server.py`, then wire it into the orchestrator's router.
 
 ## Notes on Gemini models
 
