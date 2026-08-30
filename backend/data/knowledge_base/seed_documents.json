@@ -1,0 +1,67 @@
+[
+  {
+    "source": "career_guide_resume_writing",
+    "doc_type": "career_guide",
+    "text": "A strong technical resume for placements should be one page, use reverse-chronological order, and lead with impact-oriented bullet points that follow the pattern: action verb + what you built + technology used + measurable outcome. Quantify results wherever possible (e.g., 'reduced API latency by 40%' rather than 'improved performance'). Keep a dedicated Skills section grouped by category (Languages, Frameworks, Databases, Tools) so ATS parsers and recruiters can scan it quickly. Projects should include a live link or GitHub repo. Avoid objective statements; use a 2-line summary instead. Tailor keywords to the specific job description before every application."
+  },
+  {
+    "source": "career_guide_applying_strategy",
+    "doc_type": "career_guide",
+    "text": "Students should track applications in a spreadsheet with columns for company, role, date applied, status, and referral contact. Applying within 48 hours of a job posting going live meaningfully increases response rates. Referrals from alumni or LinkedIn connections at the target company increase interview conversion significantly compared to cold applications. For campus placements, prioritize companies whose tech stack overlaps with your strongest skills, and always research the company's recent products or engineering blog before an interview."
+  },
+  {
+    "source": "interview_prep_dsa",
+    "doc_type": "interview_prep",
+    "text": "Data structures and algorithms interviews typically test arrays, strings, hashmaps, two-pointer techniques, sliding window, trees, graphs, dynamic programming, and recursion/backtracking. A strong preparation plan: 1) master time/space complexity analysis, 2) solve 150-200 curated problems (e.g., Blind 75 / NeetCode 150) grouped by pattern rather than randomly, 3) practice explaining your approach out loud before coding, 4) always state brute-force first, then optimize. Interviewers weigh problem-solving process and communication as much as the final working code."
+  },
+  {
+    "source": "interview_prep_system_design_entry_level",
+    "doc_type": "interview_prep",
+    "text": "Entry-level and internship system design questions usually focus on designing a simple service (URL shortener, rate limiter, notification system) rather than distributed-scale architectures. Structure your answer as: clarify requirements and scale, define the API, sketch the high-level components, discuss the data model, then call out one or two trade-offs (e.g., SQL vs NoSQL, caching strategy, consistency vs availability). Candidates who explicitly state assumptions and trade-offs score higher than those who jump straight to a diagram."
+  },
+  {
+    "source": "interview_prep_behavioral",
+    "doc_type": "interview_prep",
+    "text": "Behavioral interview answers should follow the STAR format: Situation, Task, Action, Result. Prepare 5-6 stories from past projects or internships covering: a conflict you resolved, a deadline you missed and recovered from, a time you took initiative, a technical decision you owned, and a time you received critical feedback. Each story should be under two minutes when spoken and end with a concrete, quantified result."
+  },
+  {
+    "source": "interview_prep_hr_common_questions",
+    "doc_type": "interview_prep",
+    "text": "Common HR round questions include: Tell me about yourself, Why this company, Why should we hire you, Where do you see yourself in five years, and What is your biggest weakness. Answers should be concise (60-90 seconds), tie back to the specific role, and avoid generic weaknesses like 'I work too hard' — instead name a real, moderate weakness and describe a concrete step taken to improve it."
+  },
+  {
+    "source": "learning_resource_dsa",
+    "doc_type": "learning_resource",
+    "text": "For Data Structures & Algorithms: NeetCode 150 (neetcode.io) for pattern-based practice, 'Cracking the Coding Interview' by Gayle Laakmann McDowell for a structured book format, and LeetCode's curated study plans for timed practice. Estimated time investment: 6-8 weeks at 1-2 hours/day for a solid baseline."
+  },
+  {
+    "source": "learning_resource_web_dev",
+    "doc_type": "learning_resource",
+    "text": "For full-stack web development: the official React documentation (react.dev) for modern hooks-based patterns, FastAPI's official tutorial (fastapi.tiangolo.com) for building REST APIs, and 'Designing Data-Intensive Applications' by Martin Kleppmann for backend/database fundamentals once basics are solid. Estimated time: 4-6 weeks to become production-comfortable if you already know one language well."
+  },
+  {
+    "source": "learning_resource_system_design",
+    "doc_type": "learning_resource",
+    "text": "For system design fundamentals: 'System Design Interview' by Alex Xu (Volume 1), the ByteByteGo newsletter/YouTube channel for visual explanations, and building 2-3 toy projects (chat app, URL shortener, rate limiter) end-to-end. Estimated time: 4 weeks of consistent study for entry-level readiness."
+  },
+  {
+    "source": "learning_resource_cloud_devops",
+    "doc_type": "learning_resource",
+    "text": "For cloud and DevOps fundamentals relevant to placements: AWS Cloud Practitioner free tier + official AWS Skill Builder courses, Docker's official 'Get Started' guide, and GitHub Actions documentation for CI/CD basics. Estimated time: 3-4 weeks for working familiarity, 8+ weeks for certification-level depth."
+  },
+  {
+    "source": "learning_resource_ml_ai",
+    "doc_type": "learning_resource",
+    "text": "For Machine Learning / AI fundamentals: Andrew Ng's 'Machine Learning Specialization' on Coursera for theory, the LangChain and LangGraph official documentation for building agentic applications, and Hugging Face's free NLP course for transformer-based models. Estimated time: 8-10 weeks for a working foundation suitable for internship-level roles."
+  },
+  {
+    "source": "job_description_template_sde_intern",
+    "doc_type": "job_description",
+    "text": "Software Engineer Intern - sample requirements: strong fundamentals in data structures and algorithms; proficiency in at least one of Python, Java, or C++; experience with Git and collaborative development workflows; exposure to REST API design; familiarity with SQL databases; bonus for prior internship or open-source contributions; expected to contribute to a production codebase under senior engineer mentorship over an 8-12 week internship."
+  },
+  {
+    "source": "job_description_template_fullstack",
+    "doc_type": "job_description",
+    "text": "Full Stack Developer (entry-level) - sample requirements: React or similar frontend framework, Node.js or Python backend experience, REST/GraphQL API design, relational and non-relational database experience (PostgreSQL/MongoDB), understanding of CI/CD pipelines, cloud deployment experience (AWS/GCP/Azure) is a plus, strong debugging and code-review etiquette."
+  }
+]

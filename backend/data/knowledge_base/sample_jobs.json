@@ -1,0 +1,42 @@
+[
+  {
+    "id": "local-1",
+    "title": "Software Engineer Intern",
+    "company": "Kestrel Systems",
+    "location": "Bengaluru, India",
+    "description": "Looking for a Software Engineer Intern with strong fundamentals in data structures and algorithms, proficiency in Python or Java, familiarity with REST APIs, Git, and SQL databases. Exposure to React and cloud platforms (AWS/GCP) is a plus. You will work with senior engineers on a production microservice.",
+    "url": "https://example.com/jobs/local-1"
+  },
+  {
+    "id": "local-2",
+    "title": "Full Stack Developer - New Grad",
+    "company": "Northgate Labs",
+    "location": "Remote",
+    "description": "Full stack role building customer-facing dashboards. Requires React, Node.js or Python (FastAPI/Django), PostgreSQL or MongoDB, REST API design, and CI/CD familiarity (GitHub Actions). Bonus: experience with Docker and TypeScript.",
+    "url": "https://example.com/jobs/local-2"
+  },
+  {
+    "id": "local-3",
+    "title": "Machine Learning Engineer Intern",
+    "company": "Verdant AI",
+    "location": "Bengaluru, India",
+    "description": "ML internship focused on building RAG pipelines and agentic workflows. Requires Python, familiarity with LangChain or similar frameworks, vector databases (Chroma/Pinecone), and basic understanding of transformer-based LLMs. Experience with FastAPI for serving models is a plus.",
+    "url": "https://example.com/jobs/local-3"
+  },
+  {
+    "id": "local-4",
+    "title": "Backend Engineer Intern",
+    "company": "Ledgerly",
+    "location": "Hyderabad, India",
+    "description": "Backend internship on our payments team. Requires strong SQL, Python or Java, REST API design, unit testing (pytest), and understanding of database transactions and indexing. Exposure to Kafka or message queues is a plus.",
+    "url": "https://example.com/jobs/local-4"
+  },
+  {
+    "id": "local-5",
+    "title": "Cybersecurity Analyst Intern",
+    "company": "Ironclad Security",
+    "location": "Remote",
+    "description": "Support the SOC team with log analysis, vulnerability scanning (Nmap, Burp Suite), and incident response documentation. Requires networking fundamentals (TCP/IP, OSI model), scripting in Python or Bash, and familiarity with common OWASP Top 10 vulnerabilities.",
+    "url": "https://example.com/jobs/local-5"
+  }
+]

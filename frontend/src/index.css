@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-hairline;
+  }
+  ::selection {
+    @apply bg-cobalt-light text-cobalt-dark;
+  }
+  :focus-visible {
+    outline: 2px solid #2451B8;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply bg-panel border border-hairline rounded-lg shadow-panel;
+  }
+  .eyebrow {
+    @apply font-mono text-[11px] tracking-[0.12em] uppercase text-muted;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-ink text-white text-sm font-medium px-4 py-2.5
+           hover:bg-cobalt-dark transition-colors disabled:opacity-40 disabled:pointer-events-none;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-hairline bg-panel text-ink text-sm font-medium px-4 py-2.5
+           hover:border-ink transition-colors disabled:opacity-40 disabled:pointer-events-none;
+  }
+  .status-dot {
+    @apply inline-block w-2 h-2 rounded-full;
+  }
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(36, 81, 184, 0.35); }
+  100% { box-shadow: 0 0 0 8px rgba(36, 81, 184, 0); }
+}
+.status-dot--active {
+  animation: pulse-ring 1.4s ease-out infinite;
+}
