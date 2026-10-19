@@ -1,9 +1,12 @@
 from __future__ import annotations
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
+from app.auth.db import Base, engine
+from app.auth.dependencies import get_current_user
 from app.api import (
+    routes_auth,
     routes_resume,
     routes_jobs,
     routes_matching,
@@ -13,7 +16,9 @@ from app.api import (
     routes_chat,
     routes_rag,
     routes_github,
+    routes_history
 )
+
 
 app = FastAPI(
     title="Placement & Career Assistant API",
@@ -21,6 +26,8 @@ app = FastAPI(
     "Learning, Interview and Orchestrator agents, backed by RAG + MCP.",
     version="1.0.0",
 )
+
+Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
@@ -30,16 +37,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(routes_resume.router)
-app.include_router(routes_jobs.router)
-app.include_router(routes_matching.router)
-app.include_router(routes_skills.router)
-app.include_router(routes_learning.router)
-app.include_router(routes_interview.router)
-app.include_router(routes_chat.router)
-app.include_router(routes_rag.router)
-app.include_router(routes_github.router)
+app.include_router(routes_auth.router)  # public — no auth required to log in
 
+protected = [Depends(get_current_user)]
+app.include_router(routes_resume.router, dependencies=protected)
+app.include_router(routes_jobs.router, dependencies=protected)
+app.include_router(routes_matching.router, dependencies=protected)
+app.include_router(routes_skills.router, dependencies=protected)
+app.include_router(routes_learning.router, dependencies=protected)
+app.include_router(routes_interview.router, dependencies=protected)
+app.include_router(routes_chat.router, dependencies=protected)
+app.include_router(routes_rag.router, dependencies=protected)
+app.include_router(routes_github.router, dependencies=protected)
+app.include_router(routes_history.router, dependencies=protected)
+
+
+@app.on_event("startup")
+async def check_config():
+    if not settings.google_api_key:
+        import logging
+        logging.getLogger("startup").warning(
+            "GOOGLE_API_KEY is not set — all agent endpoints will fail until it's configured in .env"
+        )
 
 @app.get("/")
 async def root():

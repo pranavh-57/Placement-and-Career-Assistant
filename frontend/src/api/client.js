@@ -5,6 +5,23 @@ const client = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
+client.interceptors.request.use((config) => {
+  const token = localStorage.getItem('access_token')
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
+
+client.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem('access_token')
+      window.location.reload()
+    }
+    return Promise.reject(err)
+  }
+)
+
 export const api = {
   health: () => client.get('/health'),
 

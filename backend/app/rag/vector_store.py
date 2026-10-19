@@ -10,6 +10,9 @@ from langchain_chroma import Chroma
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_core.documents import Document
 from app.config import settings
+import logging
+
+logger = logging.getLogger("rag")
 
 _store: Chroma | None = None
 COLLECTION_NAME = "placement_assistant_kb"
@@ -37,31 +40,44 @@ def get_store() -> Chroma:
     return _store
 
 
-def add_document(text: str, source: str, doc_type: str, chunk_size: int = 1200, chunk_overlap: int = 150) -> int:
-    """Chunk and index a document. Returns number of chunks added."""
+def add_document(text: str, source: str, doc_type: str, user_id: int | None = None,
+                  chunk_size: int = 1200, chunk_overlap: int = 150) -> int:
     from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size, chunk_overlap=chunk_overlap
-    )
+    splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     chunks = splitter.split_text(text)
     if not chunks:
         return 0
 
-    docs = [
-        Document(
-            page_content=chunk,
-            metadata={"source": source, "doc_type": doc_type},
-        )
-        for chunk in chunks
-    ]
+    metadata = {"source": source, "doc_type": doc_type}
+    if user_id is not None:
+        metadata["user_id"] = user_id
+
+    docs = [Document(page_content=chunk, metadata=metadata) for chunk in chunks]
     ids = [str(uuid.uuid4()) for _ in docs]
     store = get_store()
     store.add_documents(docs, ids=ids)
     return len(docs)
 
 
-def search(query: str, k: int = 4, doc_type: str | None = None) -> list[tuple[Document, float]]:
-    store = get_store()
-    filter_ = {"doc_type": doc_type} if doc_type else None
-    return store.similarity_search_with_relevance_scores(query, k=k, filter=filter_)
+def search(query: str, k: int = 4, doc_type: str | None = None, user_id: int | None = None):
+    try:
+        store = get_store()
+        conditions = []
+        if doc_type:
+            conditions.append({"doc_type": doc_type})
+        if user_id is not None:
+            conditions.append({"user_id": user_id})
+
+        if len(conditions) == 0:
+            filter_ = None
+        elif len(conditions) == 1:
+            filter_ = conditions[0]
+        else:
+            filter_ = {"$and": conditions}  # Chroma requires $and for multi-key filters — verified above
+
+        return store.similarity_search_with_relevance_scores(query, k=k, filter=filter_)
+
+    except Exception as exc:
+        logger.warning(f"RAG search failed (query={query!r}): {exc}")
+        return []
