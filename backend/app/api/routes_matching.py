@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 from fastapi import APIRouter, HTTPException
-from app.models.schemas import JobMatchRequest, JobMatchResponse
+
 from app.agents.job_matching_agent import run_job_matching_agent
+from app.models.schemas import JobMatchRequest, JobMatchResponse
 
 router = APIRouter(prefix="/api/matching", tags=["matching"])
 

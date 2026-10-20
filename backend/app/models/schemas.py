@@ -1,10 +1,11 @@
 """Shared Pydantic models for requests, responses, and agent state."""
+
 from __future__ import annotations
-from typing import Optional
+
 from pydantic import BaseModel, Field
 
-
 # ---------- Resume / Profile ----------
+
 
 class Education(BaseModel):
     institution: str = ""
@@ -30,6 +31,7 @@ class ResumeAnalysisResponse(BaseModel):
 
 # ---------- Job search / matching ----------
 
+
 class JobListing(BaseModel):
     id: str
     title: str
@@ -42,7 +44,7 @@ class JobListing(BaseModel):
 
 class JobSearchRequest(BaseModel):
     query: str
-    location: Optional[str] = None
+    location: str | None = None
     limit: int = 5
 
 
@@ -64,6 +66,7 @@ class JobMatchResponse(BaseModel):
 
 
 # ---------- Skill gap / learning ----------
+
 
 class SkillGapRequest(BaseModel):
     profile: StudentProfile
@@ -94,9 +97,10 @@ class LearningRoadmapResponse(BaseModel):
 
 # ---------- Interview ----------
 
+
 class InterviewGenerateRequest(BaseModel):
     role: str
-    profile: Optional[StudentProfile] = None
+    profile: StudentProfile | None = None
     num_questions: int = 5
 
 
@@ -124,6 +128,7 @@ class InterviewEvaluateResponse(BaseModel):
 
 # ---------- GitHub (MCP) ----------
 
+
 class GitHubAnalysisRequest(BaseModel):
     username: str
 
@@ -138,6 +143,7 @@ class GitHubAnalysisResponse(BaseModel):
 
 # ---------- RAG ----------
 
+
 class RagIngestRequest(BaseModel):
     text: str
     source: str
@@ -147,7 +153,7 @@ class RagIngestRequest(BaseModel):
 class RagSearchRequest(BaseModel):
     query: str
     k: int = 4
-    doc_type: Optional[str] = None
+    doc_type: str | None = None
 
 
 class RagSearchResult(BaseModel):
@@ -163,9 +169,10 @@ class RagSearchResponse(BaseModel):
 
 # ---------- Orchestrator / chat ----------
 
+
 class ChatRequest(BaseModel):
     message: str
-    profile: Optional[StudentProfile] = None
+    profile: StudentProfile | None = None
     session_id: str = "default"
 
 
@@ -183,13 +190,13 @@ class ChatResponse(BaseModel):
 class WorkflowRequest(BaseModel):
     profile: StudentProfile
     job_query: str
-    location: Optional[str] = None
+    location: str | None = None
 
 
 class WorkflowResponse(BaseModel):
     steps: list[AgentStep]
-    job: Optional[JobListing] = None
-    match: Optional[JobMatchResponse] = None
-    skill_gap: Optional[SkillGapResponse] = None
-    roadmap: Optional[LearningRoadmapResponse] = None
+    job: JobListing | None = None
+    match: JobMatchResponse | None = None
+    skill_gap: SkillGapResponse | None = None
+    roadmap: LearningRoadmapResponse | None = None
     interview_questions: list[InterviewQuestion] = Field(default_factory=list)

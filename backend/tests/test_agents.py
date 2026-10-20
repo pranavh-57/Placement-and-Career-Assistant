@@ -1,7 +1,8 @@
-from unittest.mock import patch, MagicMock
-from app.agents.resume_agent import run_resume_agent
+from unittest.mock import MagicMock, patch
+
 from app.agents.job_matching_agent import run_job_matching_agent
-from app.models.schemas import StudentProfile, JobListing
+from app.agents.resume_agent import run_resume_agent
+from app.models.schemas import JobListing, StudentProfile
 
 
 def _mock_llm_response(json_str: str):
@@ -19,7 +20,9 @@ def test_resume_agent_parses_profile(mock_get_llm):
      "skills": ["Python", "FastAPI"], "education": [],
      "projects": ["Built a chatbot"], "experience": [], "certifications": []}
     """)
-    profile = run_resume_agent("Jane Doe resume text with Python and FastAPI experience")
+    profile = run_resume_agent(
+        "Jane Doe resume text with Python and FastAPI experience"
+    )
     assert profile.name == "Jane Doe"
     assert "Python" in profile.skills
 
@@ -33,8 +36,12 @@ def test_job_matching_agent_scores(mock_get_llm, mock_search):
      "missing_skills": ["Docker"], "rationale": "Good overlap"}
     """)
     profile = StudentProfile(skills=["Python"], projects=[], experience=[])
-    job = JobListing(id="1", title="Backend Intern", company="Acme",
-                      description="Needs Python and Docker")
+    job = JobListing(
+        id="1",
+        title="Backend Intern",
+        company="Acme",
+        description="Needs Python and Docker",
+    )
     result = run_job_matching_agent(profile, job)
     assert result.match_score == 75
     assert "Docker" in result.missing_skills

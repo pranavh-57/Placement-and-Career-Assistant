@@ -1,8 +1,12 @@
 """Single place to construct the Gemini chat model used by every agent."""
+
 from __future__ import annotations
+
 import json
 import re
+
 from langchain_google_genai import ChatGoogleGenerativeAI
+
 from app.config import settings
 
 _llm: ChatGoogleGenerativeAI | None = None
@@ -14,8 +18,7 @@ def get_llm(temperature: float = 0.3) -> ChatGoogleGenerativeAI:
     if _llm is None:
         if not settings.google_api_key:
             raise RuntimeError(
-                "GOOGLE_API_KEY is not set. Add it to backend/.env "
-                "(see .env.example)."
+                "GOOGLE_API_KEY is not set. Add it to backend/.env (see .env.example)."
             )
         _llm = ChatGoogleGenerativeAI(
             model=settings.gemini_model,
@@ -50,6 +53,7 @@ def extract_json(text: str) -> dict | list:
     # Last resort: repair common LLM JSON mistakes (unescaped newlines/quotes
     # inside string values, trailing commas, etc.) rather than failing outright.
     import json_repair
+
     repaired = json_repair.loads(strict_candidate)
     if not repaired:
         raise ValueError(f"Could not parse JSON from LLM output: {text[:200]!r}")

@@ -10,13 +10,16 @@ def test_token_roundtrip(test_user):
 
 def test_invalid_token_raises():
     import pytest
+
     with pytest.raises(ValueError):
         decode_access_token("not.a.real.token")
 
 
 def test_protected_route_without_token_rejected():
     from fastapi.testclient import TestClient
+
     from app.main import app
+
     client = TestClient(app)
     r = client.post("/api/resume/upload")
     assert r.status_code == 401

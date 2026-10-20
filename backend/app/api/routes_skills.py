@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 from fastapi import APIRouter, HTTPException
-from app.models.schemas import SkillGapRequest, SkillGapResponse
+
 from app.agents.skill_gap_agent import run_skill_gap_agent
+from app.models.schemas import SkillGapRequest, SkillGapResponse
 
 router = APIRouter(prefix="/api/skills", tags=["skills"])
 

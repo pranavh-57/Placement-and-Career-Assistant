@@ -1,5 +1,7 @@
 """Central app configuration, loaded from environment / .env."""
+
 from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,5 +38,9 @@ class Settings(BaseSettings):
 settings = Settings()
 
 # Ensure runtime directories exist
-for d in (settings.chroma_persist_dir, settings.knowledge_base_dir, settings.uploads_dir):
+for d in (
+    settings.chroma_persist_dir,
+    settings.knowledge_base_dir,
+    settings.uploads_dir,
+):
     Path(d).mkdir(parents=True, exist_ok=True)

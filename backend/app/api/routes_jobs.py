@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 from fastapi import APIRouter, HTTPException
-from app.models.schemas import JobSearchRequest, JobSearchResponse, JobListing
-from app.mcp_tools.mcp_client import call_job_search, MCPToolError
+
+from app.mcp_tools.mcp_client import MCPToolError, call_job_search
+from app.models.schemas import JobListing, JobSearchRequest, JobSearchResponse
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 

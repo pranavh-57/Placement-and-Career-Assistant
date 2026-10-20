@@ -1,6 +1,8 @@
 from datetime import datetime
-from sqlalchemy import Column, String, DateTime, Integer, ForeignKey, Text
+
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
+
 from app.auth.db import Base
 
 
@@ -14,7 +16,9 @@ class User(Base):
     picture = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    history = relationship("UserHistory", back_populates="user", cascade="all, delete-orphan")
+    history = relationship(
+        "UserHistory", back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 class UserHistory(Base):

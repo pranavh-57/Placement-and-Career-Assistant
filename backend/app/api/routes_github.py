@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 from fastapi import APIRouter, HTTPException
+
+from app.mcp_tools.mcp_client import MCPToolError, call_github_analysis
 from app.models.schemas import GitHubAnalysisRequest, GitHubAnalysisResponse
-from app.mcp_tools.mcp_client import call_github_analysis, MCPToolError
 
 router = APIRouter(prefix="/api/github", tags=["github"])
 

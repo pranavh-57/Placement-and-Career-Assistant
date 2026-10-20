@@ -1,7 +1,8 @@
-import sys
 import asyncio
+import sys
 
 import uvicorn
+
 from app.main import app
 
 if sys.platform == "win32":

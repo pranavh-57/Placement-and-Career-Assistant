@@ -1,4 +1,3 @@
-import json
 from app.mcp_tools.job_search_server import _search_local
 
 

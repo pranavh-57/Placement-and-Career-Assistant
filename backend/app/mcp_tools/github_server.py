@@ -5,10 +5,13 @@ set GITHUB_TOKEN in .env for higher limits.
 
 Run standalone for debugging:  python -m app.mcp_tools.github_server
 """
+
 import json
 from collections import Counter
+
 import httpx
 from mcp.server.fastmcp import FastMCP
+
 from app.config import settings
 
 mcp = FastMCP("github-analysis")
@@ -70,7 +73,9 @@ def analyze_github_profile(username: str) -> str:
         return json.dumps(result)
     except httpx.HTTPStatusError as exc:
         return json.dumps(
-            {"error": f"GitHub API error {exc.response.status_code} for user '{username}'"}
+            {
+                "error": f"GitHub API error {exc.response.status_code} for user '{username}'"
+            }
         )
     except Exception as exc:  # noqa: BLE001
         return json.dumps({"error": str(exc)})

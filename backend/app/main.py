@@ -1,24 +1,24 @@
 from __future__ import annotations
-from fastapi import FastAPI, Depends
+
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.config import settings
-from app.auth.db import Base, engine
-from app.auth.dependencies import get_current_user
 from app.api import (
     routes_auth,
-    routes_resume,
-    routes_jobs,
-    routes_matching,
-    routes_skills,
-    routes_learning,
-    routes_interview,
     routes_chat,
-    routes_rag,
     routes_github,
-    routes_history
+    routes_history,
+    routes_interview,
+    routes_jobs,
+    routes_learning,
+    routes_matching,
+    routes_rag,
+    routes_resume,
+    routes_skills,
 )
-
+from app.auth.db import Base, engine
+from app.auth.dependencies import get_current_user
+from app.config import settings
 
 app = FastAPI(
     title="Placement & Career Assistant API",
@@ -56,9 +56,11 @@ app.include_router(routes_history.router, dependencies=protected)
 async def check_config():
     if not settings.google_api_key:
         import logging
+
         logging.getLogger("startup").warning(
             "GOOGLE_API_KEY is not set — all agent endpoints will fail until it's configured in .env"
         )
+
 
 @app.get("/")
 async def root():

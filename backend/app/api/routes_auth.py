@@ -3,10 +3,10 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.auth.db import get_db
-from app.auth.models import User
-from app.auth.google_oauth import verify_google_id_token
-from app.auth.security import create_access_token
 from app.auth.dependencies import get_current_user
+from app.auth.google_oauth import verify_google_id_token
+from app.auth.models import User
+from app.auth.security import create_access_token
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 

@@ -1,8 +1,15 @@
 from __future__ import annotations
+
 from fastapi import APIRouter
-from app.models.schemas import RagIngestRequest, RagSearchRequest, RagSearchResponse, RagSearchResult
-from app.rag.vector_store import add_document, search
+
+from app.models.schemas import (
+    RagIngestRequest,
+    RagSearchRequest,
+    RagSearchResponse,
+    RagSearchResult,
+)
 from app.rag.ingest import ingest_seed_kb
+from app.rag.vector_store import add_document, search
 
 router = APIRouter(prefix="/api/rag", tags=["rag"])
 

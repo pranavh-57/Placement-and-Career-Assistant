@@ -1,4 +1,5 @@
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from app.rag import vector_store
 
 
@@ -6,7 +7,9 @@ from app.rag import vector_store
 def test_add_document_chunks_and_indexes(mock_get_store):
     mock_store = MagicMock()
     mock_get_store.return_value = mock_store
-    n = vector_store.add_document("some resume text " * 50, source="resume.pdf", doc_type="resume", user_id=1)
+    n = vector_store.add_document(
+        "some resume text " * 50, source="resume.pdf", doc_type="resume", user_id=1
+    )
     assert n > 0
     mock_store.add_documents.assert_called_once()
 

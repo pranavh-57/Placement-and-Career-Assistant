@@ -3,9 +3,12 @@ prep material, and learning resources shipped in data/knowledge_base/.
 
 Run with:  python -m app.rag.ingest
 """
+
 from __future__ import annotations
+
 import json
 from pathlib import Path
+
 from app.config import settings
 from app.rag.vector_store import add_document
 

@@ -1,11 +1,11 @@
 import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from fastapi.testclient import TestClient
 
 from app.auth.db import Base, get_db
-from app.auth.models import User
 from app.auth.dependencies import get_current_user
+from app.auth.models import User
 from app.auth.security import create_access_token
 from app.main import app
 
@@ -37,8 +37,14 @@ def db_session():
 @pytest.fixture()
 def test_user(db_session):
     import uuid
+
     unique = uuid.uuid4().hex[:8]
-    user = User(google_id=f"test-{unique}", email=f"test-{unique}@example.com", name="Test User", picture=None)
+    user = User(
+        google_id=f"test-{unique}",
+        email=f"test-{unique}@example.com",
+        name="Test User",
+        picture=None,
+    )
     db_session.add(user)
     db_session.commit()
     db_session.refresh(user)

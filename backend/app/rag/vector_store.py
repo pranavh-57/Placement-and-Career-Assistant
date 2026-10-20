@@ -4,13 +4,17 @@ Holds five kinds of documents (see doc_type): resume, job_description,
 interview_prep, learning_resource, career_guide. All agents retrieve
 through `search()` before generating recommendations.
 """
+
 from __future__ import annotations
-import uuid
-from langchain_chroma import Chroma
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from langchain_core.documents import Document
-from app.config import settings
+
 import logging
+import uuid
+
+from langchain_chroma import Chroma
+from langchain_core.documents import Document
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+
+from app.config import settings
 
 logger = logging.getLogger("rag")
 
@@ -40,11 +44,19 @@ def get_store() -> Chroma:
     return _store
 
 
-def add_document(text: str, source: str, doc_type: str, user_id: int | None = None,
-                  chunk_size: int = 1200, chunk_overlap: int = 150) -> int:
+def add_document(
+    text: str,
+    source: str,
+    doc_type: str,
+    user_id: int | None = None,
+    chunk_size: int = 1200,
+    chunk_overlap: int = 150,
+) -> int:
     from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-    splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size, chunk_overlap=chunk_overlap
+    )
     chunks = splitter.split_text(text)
     if not chunks:
         return 0
@@ -60,7 +72,9 @@ def add_document(text: str, source: str, doc_type: str, user_id: int | None = No
     return len(docs)
 
 
-def search(query: str, k: int = 4, doc_type: str | None = None, user_id: int | None = None):
+def search(
+    query: str, k: int = 4, doc_type: str | None = None, user_id: int | None = None
+):
     try:
         store = get_store()
         conditions = []
@@ -74,7 +88,9 @@ def search(query: str, k: int = 4, doc_type: str | None = None, user_id: int | N
         elif len(conditions) == 1:
             filter_ = conditions[0]
         else:
-            filter_ = {"$and": conditions}  # Chroma requires $and for multi-key filters — verified above
+            filter_ = {
+                "$and": conditions
+            }  # Chroma requires $and for multi-key filters — verified above
 
         return store.similarity_search_with_relevance_scores(query, k=k, filter=filter_)
 

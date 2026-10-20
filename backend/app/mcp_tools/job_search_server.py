@@ -6,10 +6,13 @@ end-to-end without any paid keys.
 
 Run standalone for debugging:  python -m app.mcp_tools.job_search_server
 """
+
 import json
 from pathlib import Path
+
 import httpx
 from mcp.server.fastmcp import FastMCP
+
 from app.config import settings
 
 mcp = FastMCP("job-search")
@@ -61,7 +64,7 @@ def _search_tavily(query: str, location: str | None, limit: int) -> list[dict]:
     for i, item in enumerate(data.get("results", [])[:limit]):
         jobs.append(
             {
-                "id": f"web-{i}-{hash(item['url']) & 0xffff}",
+                "id": f"web-{i}-{hash(item['url']) & 0xFFFF}",
                 "title": item.get("title", query),
                 "company": "See listing",
                 "location": location or "",

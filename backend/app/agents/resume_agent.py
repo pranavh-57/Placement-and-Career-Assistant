@@ -2,10 +2,13 @@
 projects, experience, certifications) from raw resume text using Gemini,
 grounded with a JSON-only prompt so the output is reliably parseable.
 """
+
 from __future__ import annotations
+
 from langchain_core.messages import HumanMessage, SystemMessage
-from app.models.schemas import StudentProfile, Education
-from app.utils.llm import get_llm, extract_json
+
+from app.models.schemas import Education, StudentProfile
+from app.utils.llm import extract_json, get_llm
 
 SYSTEM_PROMPT = """You are a resume-parsing specialist for a college placement assistant.
 Extract a structured profile from the resume text. Respond with ONLY valid JSON

@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 import io
+
 from app.utils.pdf_parser import extract_text_from_pdf
 
 SUPPORTED_EXTENSIONS = {"pdf", "docx", "txt"}

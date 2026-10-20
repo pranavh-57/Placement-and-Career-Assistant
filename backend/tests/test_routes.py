@@ -1,4 +1,5 @@
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
+
 from app.models.schemas import JobMatchResponse
 
 
@@ -9,7 +10,12 @@ def test_matching_route_success(client, auth_headers):
         )
         payload = {
             "profile": {"skills": ["Python"], "projects": [], "experience": []},
-            "job": {"id": "1", "title": "Intern", "company": "Acme", "description": "Python role"},
+            "job": {
+                "id": "1",
+                "title": "Intern",
+                "company": "Acme",
+                "description": "Python role",
+            },
         }
         r = client.post("/api/matching/score", json=payload, headers=auth_headers)
         assert r.status_code == 200
@@ -17,10 +23,18 @@ def test_matching_route_success(client, auth_headers):
 
 
 def test_matching_route_handles_agent_failure(client, auth_headers):
-    with patch("app.api.routes_matching.run_job_matching_agent", side_effect=Exception("LLM down")):
+    with patch(
+        "app.api.routes_matching.run_job_matching_agent",
+        side_effect=Exception("LLM down"),
+    ):
         payload = {
             "profile": {"skills": [], "projects": [], "experience": []},
-            "job": {"id": "1", "title": "Intern", "company": "Acme", "description": "desc"},
+            "job": {
+                "id": "1",
+                "title": "Intern",
+                "company": "Acme",
+                "description": "desc",
+            },
         }
         r = client.post("/api/matching/score", json=payload, headers=auth_headers)
         assert r.status_code == 502
