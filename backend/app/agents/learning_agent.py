@@ -8,9 +8,10 @@ from __future__ import annotations
 
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from app.models.llm_outputs import RoadmapOut
 from app.models.schemas import LearningResource, LearningRoadmapResponse
 from app.rag.vector_store import search
-from app.utils.llm import extract_json, get_llm
+from app.utils.structured import invoke_json
 
 SYSTEM_PROMPT = """You are a Learning Recommendation Agent for a college placement assistant.
 You are given a list of missing skills and retrieved reference material describing
@@ -38,7 +39,7 @@ def run_learning_agent(
     if not missing_skills:
         return LearningRoadmapResponse(roadmap=[], total_estimated_weeks=0)
 
-    retrieved_chunks = []
+    retrieved_chunks: list[str] = []
     for skill in missing_skills:
         docs = search(skill, k=2, doc_type="learning_resource")
         retrieved_chunks.extend(d.page_content for d, _ in docs)
@@ -46,7 +47,6 @@ def run_learning_agent(
         dict.fromkeys(retrieved_chunks)
     )  # dedupe, keep order
 
-    llm = get_llm(temperature=0.3)
     user_content = f"""MISSING SKILLS: {", ".join(missing_skills)}
 ADDITIONAL CONTEXT: {context or "none"}
 
@@ -57,19 +57,14 @@ RETRIEVED LEARNING RESOURCES:
         SystemMessage(content=SYSTEM_PROMPT),
         HumanMessage(content=user_content),
     ]
-    response = llm.invoke(messages)
-    data = extract_json(response.content)
-
+    data = invoke_json(RoadmapOut, messages, temperature=0.3)
     roadmap = [
         LearningResource(
-            skill=item.get("skill", ""),
-            resources=item.get("resources", []) or [],
-            estimated_weeks=int(item.get("estimated_weeks", 2)),
+            skill=item.skill,
+            resources=item.resources,
+            estimated_weeks=max(1, item.estimated_weeks),
         )
-        for item in data.get("roadmap", []) or []
+        for item in data.roadmap
     ]
-    total = int(
-        data.get("total_estimated_weeks", sum(r.estimated_weeks for r in roadmap))
-    )
-
+    total = data.total_estimated_weeks or sum(r.estimated_weeks for r in roadmap)
     return LearningRoadmapResponse(roadmap=roadmap, total_estimated_weeks=total)

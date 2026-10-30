@@ -9,7 +9,9 @@ export default function LoginPage() {
         </div>
         <div>
           <h1 className="font-display text-xl font-semibold">Wayfind</h1>
-          <p className="text-sm text-muted mt-1">Sign in to continue to your placement dashboard.</p>
+          <p className="text-sm text-muted mt-1">
+            Sign in to continue to your placement dashboard.
+          </p>
         </div>
         <GoogleLoginButton />
       </div>

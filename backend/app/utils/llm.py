@@ -4,57 +4,66 @@ from __future__ import annotations
 
 import json
 import re
+from typing import Any
 
+import json_repair
+from langchain_core.messages import BaseMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
+from pydantic import SecretStr
 
 from app.config import settings
 
-_llm: ChatGoogleGenerativeAI | None = None
+_llms: dict[float, ChatGoogleGenerativeAI] = {}
 
 
 def get_llm(temperature: float = 0.3) -> ChatGoogleGenerativeAI:
-    """Lazily construct a shared Gemini chat model instance."""
-    global _llm
-    if _llm is None:
+    """Lazily construct one Gemini chat model per temperature."""
+    if temperature not in _llms:
         if not settings.google_api_key:
             raise RuntimeError(
                 "GOOGLE_API_KEY is not set. Add it to backend/.env (see .env.example)."
             )
-        _llm = ChatGoogleGenerativeAI(
+        _llms[temperature] = ChatGoogleGenerativeAI(
             model=settings.gemini_model,
-            google_api_key=settings.google_api_key,
+            api_key=SecretStr(settings.google_api_key),
             temperature=temperature,
         )
-    return _llm
+    return _llms[temperature]
 
 
-def extract_json(text: str) -> dict | list:
-    """Best-effort extraction of a JSON object/array from an LLM response
-    that may be wrapped in markdown fences, contain extra prose, or have
-    minor syntax issues (e.g. literal newlines or stray quotes inside a
-    string value — common when the model is asked to return markdown-
-    formatted text inside a JSON field)."""
+def response_text(response: BaseMessage) -> str:
+    """Normalize an LLM response to plain text (content may be a str or a
+    list of content blocks)."""
+    content = response.content
+    if isinstance(content, str):
+        return content
+    parts: list[str] = []
+    for part in content:
+        if isinstance(part, str):
+            parts.append(part)
+        elif isinstance(part, dict) and part.get("type") == "text":
+            parts.append(str(part.get("text", "")))
+    return "".join(parts)
+
+
+def extract_json(text: str) -> dict[str, Any]:
+    """Best-effort extraction of a JSON object from an LLM response that may
+    be wrapped in markdown fences, contain extra prose, or have minor syntax
+    issues."""
     fence = re.search(r"```(?:json)?\s*(.*?)```", text, re.DOTALL)
-    candidate = fence.group(1) if fence else text
-    candidate = candidate.strip()
+    candidate = (fence.group(1) if fence else text).strip()
 
+    parsed: Any = None
     try:
-        return json.loads(candidate)
+        parsed = json.loads(candidate)
     except json.JSONDecodeError:
-        pass
+        match = re.search(r"(\{.*\})", candidate, re.DOTALL)
+        strict_candidate = match.group(1) if match else candidate
+        try:
+            parsed = json.loads(strict_candidate)
+        except json.JSONDecodeError:
+            parsed = json_repair.loads(strict_candidate)
 
-    match = re.search(r"(\{.*\}|\[.*\])", candidate, re.DOTALL)
-    strict_candidate = match.group(1) if match else candidate
-    try:
-        return json.loads(strict_candidate)
-    except json.JSONDecodeError:
-        pass
-
-    # Last resort: repair common LLM JSON mistakes (unescaped newlines/quotes
-    # inside string values, trailing commas, etc.) rather than failing outright.
-    import json_repair
-
-    repaired = json_repair.loads(strict_candidate)
-    if not repaired:
-        raise ValueError(f"Could not parse JSON from LLM output: {text[:200]!r}")
-    return repaired
+    if not isinstance(parsed, dict) or not parsed:
+        raise ValueError(f"Could not parse JSON object from LLM output: {text[:200]!r}")
+    return parsed

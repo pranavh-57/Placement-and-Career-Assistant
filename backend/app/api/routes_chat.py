@@ -1,9 +1,6 @@
-from __future__ import annotations
-
-import asyncio
 import json
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.agents.orchestrator import run_chat_orchestrator, run_full_workflow
@@ -22,26 +19,43 @@ from app.models.schemas import (
     WorkflowRequest,
     WorkflowResponse,
 )
+from app.rate_limit import limiter
 
 router = APIRouter(prefix="/api", tags=["orchestrator"])
 
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat(req: ChatRequest):
+@limiter.limit("20/minute")
+async def chat(
+    request: Request,
+    req: ChatRequest,
+    current_user: User = Depends(get_current_user),
+):
     try:
-        reply, steps = run_chat_orchestrator(req.message, req.profile)
+        reply, steps = await run_chat_orchestrator(
+            req.message, req.profile, current_user.id, req.session_id
+        )
     except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Assistant failed: {exc}")
+        raise HTTPException(status_code=502, detail=f"Assistant failed: {exc}") from exc
     return ChatResponse(reply=reply, steps=steps)
 
 
 @router.post("/workflow/run", response_model=WorkflowResponse)
+@limiter.limit("5/minute")
 async def run_workflow(
+    request: Request,
     req: WorkflowRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    final_state = run_full_workflow(req.profile, req.job_query, req.location or "")
+    try:
+        final_state = await run_full_workflow(
+            req.profile, req.job_query, req.location or ""
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502, detail=f"Workflow execution failed: {exc}"
+        ) from exc
 
     db.add(
         UserHistory(
@@ -54,20 +68,12 @@ async def run_workflow(
                     "skill_gap": final_state.get("skill_gap"),
                     "roadmap": final_state.get("roadmap"),
                     "interview_questions": final_state.get("interview_questions"),
-                }
+                },
+                default=str,
             ),
         )
     )
     db.commit()
-    try:
-        final_state = await asyncio.to_thread(
-            run_full_workflow,
-            req.profile,
-            req.job_query,
-            req.location or "",
-        )
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Workflow execution failed: {exc}")
 
     job = JobListing(**final_state["job"]) if final_state.get("job") else None
     match = (

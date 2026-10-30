@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { useAuth } from '../context/AuthContext.jsx'
+import { useAuth } from '../context/useAuth.js'
 
 export default function GoogleLoginButton() {
   const buttonRef = useRef(null)

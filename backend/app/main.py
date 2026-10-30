@@ -1,7 +1,13 @@
 from __future__ import annotations
 
+import asyncio
+import logging
+
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 from app.api import (
     routes_auth,
@@ -16,9 +22,12 @@ from app.api import (
     routes_resume,
     routes_skills,
 )
-from app.auth.db import Base, engine
 from app.auth.dependencies import get_current_user
 from app.config import settings
+from app.rag.ingest import seed_if_empty
+from app.rate_limit import limiter
+
+logger = logging.getLogger("startup")
 
 app = FastAPI(
     title="Placement & Career Assistant API",
@@ -27,7 +36,6 @@ app = FastAPI(
     version="1.0.0",
 )
 
-Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
@@ -51,15 +59,21 @@ app.include_router(routes_rag.router, dependencies=protected)
 app.include_router(routes_github.router, dependencies=protected)
 app.include_router(routes_history.router, dependencies=protected)
 
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
+app.add_middleware(SlowAPIMiddleware)
+
 
 @app.on_event("startup")
-async def check_config():
+async def startup() -> None:
     if not settings.google_api_key:
-        import logging
-
-        logging.getLogger("startup").warning(
-            "GOOGLE_API_KEY is not set — all agent endpoints will fail until it's configured in .env"
-        )
+        logger.warning("GOOGLE_API_KEY is not set: agent endpoints will fail.")
+        return
+    if settings.seed_on_startup:
+        try:
+            logger.info("KB seed: %s", await asyncio.to_thread(seed_if_empty))
+        except Exception:
+            logger.exception("Knowledge base seeding failed")
 
 
 @app.get("/")

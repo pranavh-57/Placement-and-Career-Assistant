@@ -8,8 +8,9 @@ from __future__ import annotations
 
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from app.models.llm_outputs import SkillGapOut
 from app.models.schemas import JobListing, SkillGapResponse, StudentProfile
-from app.utils.llm import extract_json, get_llm
+from app.utils.structured import invoke_json
 
 SYSTEM_PROMPT = """You are a Skill Gap Agent for a college placement assistant.
 Given a student's current skills and a target job description, respond with
@@ -27,7 +28,6 @@ highest-impact/most-frequently-required first to nice-to-have last.
 
 
 def run_skill_gap_agent(profile: StudentProfile, job: JobListing) -> SkillGapResponse:
-    llm = get_llm(temperature=0.2)
     user_content = f"""STUDENT SKILLS: {", ".join(profile.skills) or "none listed"}
 JOB TITLE: {job.title}
 JOB DESCRIPTION: {job.description}
@@ -36,14 +36,9 @@ JOB DESCRIPTION: {job.description}
         SystemMessage(content=SYSTEM_PROMPT),
         HumanMessage(content=user_content),
     ]
-    response = llm.invoke(messages)
-    data = extract_json(response.content)
-
-    missing = data.get("missing_skills", []) or []
-    priority = data.get("priority_order", []) or missing
-
+    data = invoke_json(SkillGapOut, messages, temperature=0.2)
     return SkillGapResponse(
-        missing_skills=missing,
-        priority_order=priority,
-        explanation=data.get("explanation", ""),
+        missing_skills=data.missing_skills,
+        priority_order=data.priority_order or data.missing_skills,
+        explanation=data.explanation,
     )

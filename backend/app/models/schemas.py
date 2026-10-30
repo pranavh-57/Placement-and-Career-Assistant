@@ -4,6 +4,13 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
+
+class RagIngestRequest(BaseModel):
+    text: str = Field(max_length=50_000)
+    source: str = Field(max_length=200)
+    doc_type: str = "user_note"  # ignored; server forces user_note
+
+
 # ---------- Resume / Profile ----------
 
 
@@ -21,7 +28,9 @@ class StudentProfile(BaseModel):
     projects: list[str] = Field(default_factory=list)
     experience: list[str] = Field(default_factory=list)
     certifications: list[str] = Field(default_factory=list)
-    raw_text: str = ""
+    raw_text: str = Field(
+        default="", exclude=True
+    )  # never serialized to client or prompts
 
 
 class ResumeAnalysisResponse(BaseModel):
@@ -144,12 +153,6 @@ class GitHubAnalysisResponse(BaseModel):
 # ---------- RAG ----------
 
 
-class RagIngestRequest(BaseModel):
-    text: str
-    source: str
-    doc_type: str = "career_guide"  # resume | job_description | interview_prep | learning_resource | career_guide
-
-
 class RagSearchRequest(BaseModel):
     query: str
     k: int = 4
@@ -196,6 +199,14 @@ class WorkflowRequest(BaseModel):
 class WorkflowResponse(BaseModel):
     steps: list[AgentStep]
     job: JobListing | None = None
+    match: JobMatchResponse | None = None
+    skill_gap: SkillGapResponse | None = None
+    roadmap: LearningRoadmapResponse | None = None
+    interview_questions: list[InterviewQuestion] = Field(default_factory=list)
+
+
+class HistorySnapshot(BaseModel):
+    job: JobListing
     match: JobMatchResponse | None = None
     skill_gap: SkillGapResponse | None = None
     roadmap: LearningRoadmapResponse | None = None

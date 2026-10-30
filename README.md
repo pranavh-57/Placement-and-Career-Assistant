@@ -34,7 +34,7 @@ placement-assistant/
 │   └── .env.example
 └── frontend/                  React + Vite + Tailwind CSS
     └── src/
-        ├── components/         Sidebar, AgentActivityPanel, ResumeUpload,
+        ├── components/         Sidebar, ResumeUpload,
         │                       JobSearch, MatchScore, LearningRoadmap,
         │                       InterviewPrep, Overview
         ├── api/client.js        Axios client for every backend endpoint
@@ -67,7 +67,7 @@ placement-assistant/
 
 ## Prerequisites
 
-- Python 3.11+
+- Python 3.12+
 - Node.js 18+
 - A free **Google Gemini API key**: https://aistudio.google.com/apikey
 
@@ -151,7 +151,7 @@ was actually invoked.
 
 ## Notes on Gemini models
 
-`.env.example` defaults to `gemini-2.5-flash` for chat and
+`.env.example` defaults to `gemini-3.8-flash` for chat and
 `models/gemini-embedding-001` for embeddings — both fast and inexpensive.
 Swap `GEMINI_MODEL` for a stronger model if you want higher-quality
 extraction/reasoning at higher latency/cost.

@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { useAuth } from './context/AuthContext.jsx'
+import { useAuth } from './context/useAuth.js'
 import LoginPage from './components/LoginPage.jsx'
 import Sidebar from './components/Sidebar.jsx'
 import Overview from './components/Overview.jsx'
@@ -7,6 +7,7 @@ import JobSearch from './components/JobSearch.jsx'
 import MatchScore from './components/MatchScore.jsx'
 import LearningRoadmap from './components/LearningRoadmap.jsx'
 import InterviewPrep from './components/InterviewPrep.jsx'
+import HistoryPanel from './components/HistoryPanel.jsx'
 import api from './api/client.js'
 
 export default function App() {
@@ -20,7 +21,7 @@ export default function App() {
         const id = crypto.randomUUID()
         sessionStorage.setItem('chat_session_id', id)
         return id
-      })()
+      })(),
   )
 
   const [activeTab, setActiveTab] = useState('overview')
@@ -39,7 +40,6 @@ export default function App() {
   const [matchLoading, setMatchLoading] = useState(false)
   const [roadmapLoading, setRoadmapLoading] = useState(false)
   const [interviewLoading, setInterviewLoading] = useState(false)
-  const [workflowLoading, setWorkflowLoading] = useState(false)
 
   // Now safe to branch — every hook above has already run unconditionally.
   if (authLoading) return null
@@ -71,6 +71,21 @@ export default function App() {
     setActiveTab('match')
   }
 
+  const restoreRun = (p) => {
+    setSelectedJob(p.job || null)
+    setJobs(p.job ? [p.job] : [])
+    setMatch(p.match || null)
+    setSkillGap(p.skill_gap || null)
+    setRoadmap(p.roadmap || null)
+    setInterviewQuestions(p.interview_questions || [])
+    setActiveTab('match')
+  }
+
+  const saveSnapshot = (job, parts) => {
+    if (!job) return
+    api.saveHistory({ job, ...parts }).catch(() => {})
+  }
+
   const runMatchAndGap = async () => {
     if (!profile || !selectedJob) return
     setMatchLoading(true)
@@ -79,6 +94,10 @@ export default function App() {
       setMatch(matchRes.data)
       const gapRes = await api.skillGap(profile, selectedJob)
       setSkillGap(gapRes.data)
+      saveSnapshot(selectedJob, {
+        match: matchRes.data,
+        skill_gap: gapRes.data,
+      })
     } catch (err) {
       setError(err?.response?.data?.detail || 'Analysis failed.')
     } finally {
@@ -92,6 +111,12 @@ export default function App() {
     try {
       const res = await api.learningRoadmap(skillGap.priority_order)
       setRoadmap(res.data)
+      saveSnapshot(selectedJob, {
+        match,
+        skill_gap: skillGap,
+        roadmap: res.data,
+        interview_questions: interviewQuestions,
+      })
     } catch (err) {
       setError(err?.response?.data?.detail || 'Roadmap generation failed.')
     } finally {
@@ -104,29 +129,19 @@ export default function App() {
     try {
       const res = await api.generateInterview(role, profile)
       setInterviewQuestions(res.data.questions)
+      // Only attach questions to the saved job if they were generated for that role.
+      if (selectedJob && role.trim().toLowerCase() === selectedJob.title.toLowerCase()) {
+        saveSnapshot(selectedJob, {
+          match,
+          skill_gap: skillGap,
+          roadmap,
+          interview_questions: res.data.questions,
+        })
+      }
     } catch (err) {
       setError(err?.response?.data?.detail || 'Question generation failed.')
     } finally {
       setInterviewLoading(false)
-    }
-  }
-
-  const runFullWorkflow = async (jobQuery) => {
-    if (!profile) return
-    setWorkflowLoading(true)
-    setError('')
-    try {
-      const res = await api.runWorkflow(profile, jobQuery)
-      const data = res.data
-      if (data.job) { setSelectedJob(data.job); setJobs([data.job]) }
-      if (data.match) setMatch(data.match)
-      if (data.skill_gap) setSkillGap(data.skill_gap)
-      if (data.roadmap) setRoadmap(data.roadmap)
-      if (data.interview_questions) setInterviewQuestions(data.interview_questions)
-    } catch (err) {
-      setError(err?.response?.data?.detail || 'Workflow failed.')
-    } finally {
-      setWorkflowLoading(false)
     }
   }
 
@@ -201,6 +216,8 @@ export default function App() {
               defaultRole={selectedJob?.title}
             />
           )}
+
+          {activeTab === 'history' && <HistoryPanel onRestore={restoreRun} />}
         </div>
       </main>
     </div>

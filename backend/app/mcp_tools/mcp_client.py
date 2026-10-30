@@ -30,10 +30,12 @@ _GITHUB_SERVER = StdioServerParameters(
 
 @asynccontextmanager
 async def _session(params: StdioServerParameters):
-    async with stdio_client(params) as (read, write):
-        async with ClientSession(read, write) as session:
-            await session.initialize()
-            yield session
+    async with (
+        stdio_client(params) as (read, write),
+        ClientSession(read, write) as session,
+    ):
+        await session.initialize()
+        yield session
 
 
 async def call_job_search(query: str, location: str = "", limit: int = 5) -> dict:

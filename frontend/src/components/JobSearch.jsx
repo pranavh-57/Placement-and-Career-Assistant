@@ -1,7 +1,14 @@
 import { useState } from 'react'
 import { Search, Loader2, MapPin, ExternalLink, ArrowRight } from 'lucide-react'
 
-export default function JobSearch({ onSearch, jobs, toolUsed, onSelectJob, selectedJobId, loading }) {
+export default function JobSearch({
+  onSearch,
+  jobs,
+  toolUsed,
+  onSelectJob,
+  selectedJobId,
+  loading,
+}) {
   const [query, setQuery] = useState('')
   const [location, setLocation] = useState('')
 
@@ -68,7 +75,9 @@ export default function JobSearch({ onSearch, jobs, toolUsed, onSelectJob, selec
                   {job.source}
                 </span>
               </div>
-              <p className="text-sm text-ink leading-relaxed mt-3 line-clamp-3">{job.description}</p>
+              <p className="text-sm text-ink leading-relaxed mt-3 line-clamp-3">
+                {job.description}
+              </p>
               <div className="flex items-center gap-3 mt-4">
                 <button
                   onClick={() => onSelectJob(job)}

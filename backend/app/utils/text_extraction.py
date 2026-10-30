@@ -39,7 +39,6 @@ def extract_text(filename: str, file_bytes: bytes) -> str:
 
     if ext == "pdf":
         return extract_text_from_pdf(file_bytes)
-    elif ext == "docx":
+    if ext == "docx":
         return extract_text_from_docx(file_bytes)
-    elif ext == "txt":
-        return extract_text_from_txt(file_bytes)
+    return extract_text_from_txt(file_bytes)

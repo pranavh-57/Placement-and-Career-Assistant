@@ -4,11 +4,12 @@ import { UploadCloud, CheckCircle2, Loader2 } from 'lucide-react'
 export default function ResumeUpload({ profile, onUploaded, onError, loading, setLoading }) {
   const [dragActive, setDragActive] = useState(false)
   const inputRef = useRef(null)
+  const ALLOWED = ['.pdf', '.docx', '.txt']
 
   const handleFile = async (file) => {
     if (!file) return
-    if (!file.name.toLowerCase().endsWith('.pdf')) {
-      onError('Please upload a PDF resume.')
+    if (!ALLOWED.some((ext) => file.name.toLowerCase().endsWith(ext))) {
+      onError('Please upload a PDF, DOCX, or TXT resume.')
       return
     }
     setLoading(true)
@@ -32,7 +33,10 @@ export default function ResumeUpload({ profile, onUploaded, onError, loading, se
       </div>
 
       <div
-        onDragOver={(e) => { e.preventDefault(); setDragActive(true) }}
+        onDragOver={(e) => {
+          e.preventDefault()
+          setDragActive(true)
+        }}
         onDragLeave={() => setDragActive(false)}
         onDrop={(e) => {
           e.preventDefault()
@@ -46,7 +50,7 @@ export default function ResumeUpload({ profile, onUploaded, onError, loading, se
         <input
           ref={inputRef}
           type="file"
-          accept="application/pdf"
+          accept=".pdf,.docx,.txt,application/pdf"
           className="hidden"
           onChange={(e) => handleFile(e.target.files?.[0])}
         />
@@ -56,9 +60,11 @@ export default function ResumeUpload({ profile, onUploaded, onError, loading, se
           <UploadCloud className="text-muted" size={28} />
         )}
         <p className="text-sm font-medium mt-3">
-          {loading ? 'Resume Agent is extracting your profile…' : 'Drop your resume PDF here, or click to browse'}
+          {loading
+            ? 'Resume Agent is extracting your profile…'
+            : 'Drop your resume here, or click to browse'}
         </p>
-        <p className="text-xs text-muted mt-1">PDF only, up to ~10 pages</p>
+        <p className="text-xs text-muted mt-1">PDF, DOCX, or TXT only, up to ~10 pages</p>
       </div>
 
       {profile && (
@@ -76,9 +82,15 @@ export default function ResumeUpload({ profile, onUploaded, onError, loading, se
             </div>
             <div>
               <p className="eyebrow mb-2">Education</p>
-              {profile.education?.length ? profile.education.map((e, i) => (
-                <p key={i} className="text-sm">{e.degree} · {e.institution} {e.year && `(${e.year})`}</p>
-              )) : <p className="text-sm text-muted">—</p>}
+              {profile.education?.length ? (
+                profile.education.map((e, i) => (
+                  <p key={i} className="text-sm">
+                    {e.degree} · {e.institution} {e.year && `(${e.year})`}
+                  </p>
+                ))
+              ) : (
+                <p className="text-sm text-muted">—</p>
+              )}
             </div>
           </div>
 
@@ -86,7 +98,10 @@ export default function ResumeUpload({ profile, onUploaded, onError, loading, se
             <p className="eyebrow mb-2">Skills ({profile.skills?.length || 0})</p>
             <div className="flex flex-wrap gap-1.5">
               {profile.skills?.map((s, i) => (
-                <span key={i} className="text-xs font-mono px-2 py-1 rounded bg-paper border border-hairline">
+                <span
+                  key={i}
+                  className="text-xs font-mono px-2 py-1 rounded bg-paper border border-hairline"
+                >
                   {s}
                 </span>
               ))}
@@ -98,7 +113,9 @@ export default function ResumeUpload({ profile, onUploaded, onError, loading, se
               <p className="eyebrow mb-2">Projects</p>
               <ul className="space-y-1.5">
                 {profile.projects.map((p, i) => (
-                  <li key={i} className="text-sm text-ink leading-snug">· {p}</li>
+                  <li key={i} className="text-sm text-ink leading-snug">
+                    · {p}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -109,7 +126,9 @@ export default function ResumeUpload({ profile, onUploaded, onError, loading, se
               <p className="eyebrow mb-2">Experience</p>
               <ul className="space-y-1.5">
                 {profile.experience.map((p, i) => (
-                  <li key={i} className="text-sm text-ink leading-snug">· {p}</li>
+                  <li key={i} className="text-sm text-ink leading-snug">
+                    · {p}
+                  </li>
                 ))}
               </ul>
             </div>

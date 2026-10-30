@@ -8,9 +8,10 @@ from __future__ import annotations
 
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from app.models.llm_outputs import JobMatchOut
 from app.models.schemas import JobListing, JobMatchResponse, StudentProfile
 from app.rag.vector_store import search
-from app.utils.llm import extract_json, get_llm
+from app.utils.structured import invoke_json
 
 SYSTEM_PROMPT = """You are a Job Matching Agent for a college placement assistant.
 Given a student's profile and a job description, produce ONLY valid JSON (no
@@ -34,7 +35,6 @@ def run_job_matching_agent(
     context_docs = search(job.description, k=3, doc_type="job_description")
     context_text = "\n---\n".join(d.page_content for d, _ in context_docs)
 
-    llm = get_llm(temperature=0.2)
     user_content = f"""STUDENT SKILLS: {", ".join(profile.skills) or "none listed"}
 STUDENT PROJECTS: {"; ".join(profile.projects) or "none listed"}
 STUDENT EXPERIENCE: {"; ".join(profile.experience) or "none listed"}
@@ -49,12 +49,10 @@ REFERENCE CONTEXT (similar role requirements, for calibration only):
         SystemMessage(content=SYSTEM_PROMPT),
         HumanMessage(content=user_content),
     ]
-    response = llm.invoke(messages)
-    data = extract_json(response.content)
-
+    data = invoke_json(JobMatchOut, messages, temperature=0.2)
     return JobMatchResponse(
-        match_score=int(data.get("match_score", 0)),
-        matched_skills=data.get("matched_skills", []) or [],
-        missing_skills=data.get("missing_skills", []) or [],
-        rationale=data.get("rationale", ""),
+        match_score=max(0, min(100, data.match_score)),
+        matched_skills=data.matched_skills,
+        missing_skills=data.missing_skills,
+        rationale=data.rationale,
     )

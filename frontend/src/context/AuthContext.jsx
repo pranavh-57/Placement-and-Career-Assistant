@@ -4,34 +4,33 @@ import axios from 'axios'
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem('access_token'))
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!token) { setLoading(false); return }
     axios
-      .get('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } })
+      .get('/api/auth/me', { withCredentials: true })
       .then((res) => setUser(res.data))
-      .catch(() => { setToken(null); localStorage.removeItem('access_token') })
+      .catch(() => setUser(null))
       .finally(() => setLoading(false))
-  }, [token])
+  }, [])
 
   const loginWithGoogleToken = async (googleIdToken) => {
-    const res = await axios.post('/api/auth/google', { id_token: googleIdToken })
-    localStorage.setItem('access_token', res.data.access_token)
-    setToken(res.data.access_token)
+    const res = await axios.post(
+      '/api/auth/google',
+      { id_token: googleIdToken },
+      { withCredentials: true },
+    )
     setUser(res.data.user)
   }
 
-  const logout = () => {
-    localStorage.removeItem('access_token')
-    setToken(null)
+  const logout = async () => {
+    await axios.post('/api/auth/logout', {}, { withCredentials: true }).catch(() => {})
     setUser(null)
   }
 
   return (
-    <AuthContext.Provider value={{ token, user, loading, loginWithGoogleToken, logout }}>
+    <AuthContext.Provider value={{ user, loading, loginWithGoogleToken, logout }}>
       {children}
     </AuthContext.Provider>
   )

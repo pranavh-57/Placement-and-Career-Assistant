@@ -1,4 +1,5 @@
-import { LayoutGrid, Search, Target, BookOpen, MessagesSquare, LogOut } from 'lucide-react'
+import { LayoutGrid, Search, Target, BookOpen, MessagesSquare, History, LogOut } from 'lucide-react'
+
 
 const NAV_ITEMS = [
   { id: 'overview', label: 'Overview', icon: LayoutGrid },
@@ -6,6 +7,7 @@ const NAV_ITEMS = [
   { id: 'match', label: 'Match & Skill Gap', icon: Target },
   { id: 'learning', label: 'Learning Roadmap', icon: BookOpen },
   { id: 'interview', label: 'Interview Prep', icon: MessagesSquare },
+  { id: 'history', label: 'History', icon: History },
 ]
 
 function Avatar({ user }) {
@@ -57,7 +59,11 @@ export default function Sidebar({ active, onChange, user, onLogout }) {
           <p className="text-sm font-medium truncate leading-tight">{user.name}</p>
           <p className="text-xs text-muted truncate">{user.email}</p>
         </div>
-        <button onClick={onLogout} className="text-muted hover:text-signal-red shrink-0" title="Log out">
+        <button
+          onClick={onLogout}
+          className="text-muted hover:text-signal-red shrink-0"
+          title="Log out"
+        >
           <LogOut size={15} />
         </button>
       </div>

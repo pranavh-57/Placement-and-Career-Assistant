@@ -18,7 +18,9 @@ function QuestionCard({ q, index }) {
           <span className="font-mono text-muted mr-2">{index + 1}.</span>
           {q.question}
         </p>
-        <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded shrink-0 ${CATEGORY_STYLES[q.category] || 'bg-paper text-muted'}`}>
+        <span
+          className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded shrink-0 ${CATEGORY_STYLES[q.category] || 'bg-paper text-muted'}`}
+        >
           {q.category}
         </span>
       </div>
@@ -51,8 +53,8 @@ export default function InterviewPrep({ questions, loading, onGenerate, defaultR
       <div>
         <h2 className="font-display text-xl font-semibold">Interview Preparation</h2>
         <p className="text-sm text-muted mt-1">
-          The Interview Agent generates role-specific questions with model answers, grounded
-          in retrieved prep material.
+          The Interview Agent generates role-specific questions with model answers, grounded in
+          retrieved prep material.
         </p>
       </div>
 

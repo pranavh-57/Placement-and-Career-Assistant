@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from app.models.llm_outputs import EvaluationOut, InterviewSetOut
 from app.models.schemas import (
     InterviewEvaluateResponse,
     InterviewGenerateResponse,
@@ -13,7 +14,7 @@ from app.models.schemas import (
     StudentProfile,
 )
 from app.rag.vector_store import search
-from app.utils.llm import extract_json, get_llm
+from app.utils.structured import invoke_json
 
 GENERATE_SYSTEM_PROMPT = """You are an Interview Agent for a college placement assistant.
 Generate role-specific interview questions WITH strong model answers. Respond with ONLY
@@ -64,7 +65,6 @@ def run_interview_generate(
     docs = search(f"{role} interview questions", k=4, doc_type="interview_prep")
     retrieved_text = "\n---\n".join(d.page_content for d, _ in docs)
 
-    llm = get_llm(temperature=0.5)
     profile_line = (
         f"CANDIDATE SKILLS: {', '.join(profile.skills)}\nCANDIDATE PROJECTS: {'; '.join(profile.projects)}"
         if profile
@@ -81,16 +81,16 @@ RETRIEVED INTERVIEW PREP MATERIAL:
         SystemMessage(content=GENERATE_SYSTEM_PROMPT),
         HumanMessage(content=user_content),
     ]
-    response = llm.invoke(messages)
-    data = extract_json(response.content)
-
+    data = invoke_json(InterviewSetOut, messages, temperature=0.5)
     questions = [
         InterviewQuestion(
-            question=q.get("question", ""),
-            category=q.get("category", "technical"),
-            answer=q.get("answer", ""),
+            question=q.question,
+            category=q.category
+            if q.category in {"technical", "behavioral", "system_design"}
+            else "technical",
+            answer=q.answer,
         )
-        for q in data.get("questions", []) or []
+        for q in data.questions
     ]
     return InterviewGenerateResponse(
         questions=questions[:num_questions] if num_questions else questions
@@ -100,7 +100,6 @@ RETRIEVED INTERVIEW PREP MATERIAL:
 def run_interview_evaluate(
     question: str, answer: str, role: str = ""
 ) -> InterviewEvaluateResponse:
-    llm = get_llm(temperature=0.2)
     user_content = f"""ROLE: {role or "not specified"}
 QUESTION: {question}
 CANDIDATE ANSWER: {answer}
@@ -109,11 +108,9 @@ CANDIDATE ANSWER: {answer}
         SystemMessage(content=EVALUATE_SYSTEM_PROMPT),
         HumanMessage(content=user_content),
     ]
-    response = llm.invoke(messages)
-    data = extract_json(response.content)
-
+    data = invoke_json(EvaluationOut, messages, temperature=0.2)
     return InterviewEvaluateResponse(
-        score=int(data.get("score", 0)),
-        feedback=data.get("feedback", ""),
-        improved_answer_tips=data.get("improved_answer_tips", []) or [],
+        score=max(0, min(10, data.score)),
+        feedback=data.feedback,
+        improved_answer_tips=data.improved_answer_tips,
     )
