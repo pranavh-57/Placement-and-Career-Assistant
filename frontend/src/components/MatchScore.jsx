@@ -127,7 +127,7 @@ export default function MatchScore({ job, match, skillGap, loading, onAnalyze })
                 <span className="text-xs font-mono text-muted w-5">{i + 1}</span>
                 <div className="flex-1 h-2 rounded-full bg-paper overflow-hidden">
                   <div
-                    className="h-full bg-cobalt-DEFAULT rounded-full"
+                    className="h-full bg-cobalt rounded-full"
                     style={{
                       width: `${100 - i * (80 / Math.max(skillGap.priority_order.length, 1))}%`,
                     }}

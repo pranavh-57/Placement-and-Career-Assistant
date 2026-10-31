@@ -1,7 +1,6 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
-
-const AuthContext = createContext(null)
+import { AuthContext } from './context.js'
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
@@ -15,23 +14,24 @@ export function AuthProvider({ children }) {
       .finally(() => setLoading(false))
   }, [])
 
-  const loginWithGoogleToken = async (googleIdToken) => {
+  const loginWithGoogleToken = useCallback(async (googleIdToken) => {
     const res = await axios.post(
       '/api/auth/google',
       { id_token: googleIdToken },
       { withCredentials: true },
     )
     setUser(res.data.user)
-  }
+  }, [])
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await axios.post('/api/auth/logout', {}, { withCredentials: true }).catch(() => {})
     setUser(null)
-  }
+  }, [])
 
-  return (
-    <AuthContext.Provider value={{ user, loading, loginWithGoogleToken, logout }}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({ user, loading, loginWithGoogleToken, logout }),
+    [user, loading, loginWithGoogleToken, logout],
   )
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

@@ -45,7 +45,7 @@ export default function ResumeUpload({ profile, onUploaded, onError, loading, se
         }}
         onClick={() => inputRef.current?.click()}
         className={`panel px-6 py-10 flex flex-col items-center justify-center text-center cursor-pointer transition-colors
-          ${dragActive ? 'border-cobalt-DEFAULT bg-cobalt-light/40' : 'hover:border-ink'}`}
+          ${dragActive ? 'border-cobalt bg-cobalt-light/40' : 'hover:border-ink'}`}
       >
         <input
           ref={inputRef}
@@ -55,7 +55,7 @@ export default function ResumeUpload({ profile, onUploaded, onError, loading, se
           onChange={(e) => handleFile(e.target.files?.[0])}
         />
         {loading ? (
-          <Loader2 className="animate-spin text-cobalt-DEFAULT" size={28} />
+          <Loader2 className="animate-spin text-cobalt" size={28} />
         ) : (
           <UploadCloud className="text-muted" size={28} />
         )}

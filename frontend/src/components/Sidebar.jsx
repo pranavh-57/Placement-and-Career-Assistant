@@ -1,6 +1,5 @@
 import { LayoutGrid, Search, Target, BookOpen, MessagesSquare, History, LogOut } from 'lucide-react'
 
-
 const NAV_ITEMS = [
   { id: 'overview', label: 'Overview', icon: LayoutGrid },
   { id: 'jobs', label: 'Job Search', icon: Search },
@@ -25,7 +24,7 @@ function Avatar({ user }) {
 export default function Sidebar({ active, onChange, user, onLogout }) {
   return (
     <aside className="w-60 shrink-0 border-r border-hairline bg-panel flex flex-col">
-      <div className="px-5 py-6 border-b border-hairline border-t-[3px] border-t-cobalt-DEFAULT">
+      <div className="px-5 py-6 border-b border-hairline border-t-[3px] border-t-cobalt">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-md bg-ink flex items-center justify-center">
             <span className="text-white font-display font-semibold text-sm">W</span>

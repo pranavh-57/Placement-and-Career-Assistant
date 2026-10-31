@@ -62,8 +62,9 @@ export default function InterviewPrep({ questions, loading, onGenerate, defaultR
         <input
           value={role}
           onChange={(e) => setRole(e.target.value)}
+          maxLength={200}
           placeholder="Target role, e.g. Backend Engineer Intern"
-          className="flex-1 text-sm px-3 py-2.5 rounded-md border border-hairline focus:border-cobalt-DEFAULT outline-none"
+          className="flex-1 text-sm px-3 py-2.5 rounded-md border border-hairline focus:border-cobalt outline-none"
         />
         <button
           onClick={() => role.trim() && onGenerate(role)}

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import sys
 from contextlib import asynccontextmanager
 
@@ -20,11 +21,23 @@ class MCPToolError(Exception):
     """Raised when an MCP tool server can't be reached or errors out."""
 
 
-_JOB_SERVER = StdioServerParameters(
-    command=sys.executable, args=["-m", "app.mcp_tools.job_search_server"]
-)
-_GITHUB_SERVER = StdioServerParameters(
-    command=sys.executable, args=["-m", "app.mcp_tools.github_server"]
+def _server_params(module: str) -> StdioServerParameters:
+    # The MCP SDK only forwards a minimal environment to the child process by
+    # default. Pass the full environment so TAVILY_API_KEY / GITHUB_TOKEN set on
+    # the host (e.g. Render) reach the tool servers.
+    return StdioServerParameters(
+        command=sys.executable,
+        args=["-m", module],
+        env=dict(os.environ),
+    )
+
+
+_JOB_SERVER = _server_params("app.mcp_tools.job_search_server")
+_GITHUB_SERVER = _server_params("app.mcp_tools.github_server")
+
+_WINDOWS_HINT = (
+    "this is a known Windows event-loop issue; start the API with `python run.py` "
+    "instead of `uvicorn --reload`."
 )
 
 
@@ -52,8 +65,7 @@ async def call_job_search(query: str, location: str = "", limit: int = 5) -> dic
         raise MCPToolError("Job search tool timed out after 20s.")
     except NotImplementedError as exc:
         raise MCPToolError(
-            "Could not start the job-search MCP server — this is a known Windows "
-            "event-loop issue (see README troubleshooting section)."
+            f"Could not start the job-search MCP server — {_WINDOWS_HINT}"
         ) from exc
     except Exception as exc:
         raise MCPToolError(f"Job search tool failed: {exc}") from exc
@@ -72,8 +84,7 @@ async def call_github_analysis(username: str) -> dict:
         raise MCPToolError("GitHub analysis tool timed out after 15s.")
     except NotImplementedError as exc:
         raise MCPToolError(
-            "Could not start the GitHub MCP server — this is a known Windows "
-            "event-loop issue (see README troubleshooting section)."
+            f"Could not start the GitHub MCP server — {_WINDOWS_HINT}"
         ) from exc
     except Exception as exc:
         raise MCPToolError(f"GitHub analysis tool failed: {exc}") from exc

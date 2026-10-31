@@ -11,6 +11,13 @@ function progress(p) {
   return done.join(' · ')
 }
 
+// SQLite returns naive timestamps ("2026-10-23T10:00:00"), Postgres returns an
+// explicit offset ("...+00:00"). Treat naive values as UTC, leave the rest alone.
+function parseTimestamp(value) {
+  const hasZone = /(Z|[+-]\d{2}:?\d{2})$/i.test(value)
+  return new Date(hasZone ? value : `${value}Z`)
+}
+
 export default function HistoryPanel({ onRestore }) {
   const [runs, setRuns] = useState(null)
 
@@ -43,7 +50,7 @@ export default function HistoryPanel({ onRestore }) {
                 {r.payload.job?.company ? ` · ${r.payload.job.company}` : ''}
               </p>
               <p className="text-xs text-muted mt-0.5">
-                {new Date(r.created_at + 'Z').toLocaleString()}
+                {parseTimestamp(r.created_at).toLocaleString()}
                 {progress(r.payload) ? ` · ${progress(r.payload)}` : ''}
               </p>
             </div>

@@ -32,14 +32,16 @@ export default function JobSearch({
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          maxLength={200}
           placeholder="e.g. backend engineer intern, python"
-          className="flex-1 text-sm px-3 py-2.5 rounded-md border border-hairline focus:border-cobalt-DEFAULT outline-none"
+          className="flex-1 text-sm px-3 py-2.5 rounded-md border border-hairline focus:border-cobalt outline-none"
         />
         <input
           value={location}
           onChange={(e) => setLocation(e.target.value)}
+          maxLength={100}
           placeholder="Location (optional)"
-          className="w-48 text-sm px-3 py-2.5 rounded-md border border-hairline focus:border-cobalt-DEFAULT outline-none"
+          className="w-48 text-sm px-3 py-2.5 rounded-md border border-hairline focus:border-cobalt outline-none"
         />
         <button type="submit" className="btn-primary" disabled={loading}>
           {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
@@ -59,7 +61,7 @@ export default function JobSearch({
           return (
             <div
               key={job.id}
-              className={`panel p-5 transition-colors ${isSelected ? 'border-cobalt-DEFAULT ring-1 ring-cobalt-DEFAULT' : ''}`}
+              className={`panel p-5 transition-colors ${isSelected ? 'border-cobalt ring-1 ring-cobalt' : ''}`}
             >
               <div className="flex items-start justify-between gap-4">
                 <div>

@@ -4,6 +4,13 @@ import ResumeUpload from './ResumeUpload.jsx'
 import StatCard from './StatCard.jsx'
 import ReactMarkdown from 'react-markdown'
 
+function errorText(err) {
+  const detail = err?.response?.data?.detail
+  return typeof detail === 'string' && detail
+    ? detail
+    : 'Sorry, something went wrong. Please try again.'
+}
+
 export default function Overview({
   profile,
   onResumeUploaded,
@@ -31,6 +38,8 @@ export default function Overview({
     try {
       const reply = await onChat(message)
       setChatLog((log) => [...log, { role: 'assistant', text: reply }])
+    } catch (err) {
+      setChatLog((log) => [...log, { role: 'assistant', text: errorText(err) }])
     } finally {
       setChatLoading(false)
     }
@@ -103,7 +112,7 @@ export default function Overview({
 
       <div>
         <div className="flex items-center gap-1.5 mb-1">
-          <Sparkles size={13} className="text-cobalt-DEFAULT" />
+          <Sparkles size={13} className="text-cobalt" />
           <p className="eyebrow">AI Assistant</p>
         </div>
         <p className="text-xs text-muted mb-4">
@@ -136,8 +145,9 @@ export default function Overview({
             <input
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
+              maxLength={2000}
               placeholder="Ask a question…"
-              className="flex-1 text-sm px-3 py-2.5 rounded-md border border-hairline focus:border-cobalt-DEFAULT outline-none"
+              className="flex-1 text-sm px-3 py-2.5 rounded-md border border-hairline focus:border-cobalt outline-none"
             />
             <button type="submit" className="btn-secondary" disabled={chatLoading}>
               <Send size={15} />

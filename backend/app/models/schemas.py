@@ -52,9 +52,9 @@ class JobListing(BaseModel):
 
 
 class JobSearchRequest(BaseModel):
-    query: str
-    location: str | None = None
-    limit: int = 5
+    query: str = Field(min_length=1, max_length=200)
+    location: str | None = Field(default=None, max_length=100)
+    limit: int = Field(default=5, ge=1, le=20)
 
 
 class JobSearchResponse(BaseModel):
@@ -89,8 +89,8 @@ class SkillGapResponse(BaseModel):
 
 
 class LearningRequest(BaseModel):
-    missing_skills: list[str]
-    context: str = ""
+    missing_skills: list[str] = Field(max_length=30)
+    context: str = Field(default="", max_length=2000)
 
 
 class LearningResource(BaseModel):
@@ -108,9 +108,9 @@ class LearningRoadmapResponse(BaseModel):
 
 
 class InterviewGenerateRequest(BaseModel):
-    role: str
+    role: str = Field(min_length=1, max_length=200)
     profile: StudentProfile | None = None
-    num_questions: int = 5
+    num_questions: int = Field(default=5, ge=1, le=10)
 
 
 class InterviewQuestion(BaseModel):
@@ -124,9 +124,9 @@ class InterviewGenerateResponse(BaseModel):
 
 
 class InterviewEvaluateRequest(BaseModel):
-    question: str
-    answer: str
-    role: str = ""
+    question: str = Field(max_length=2000)
+    answer: str = Field(max_length=10_000)
+    role: str = Field(default="", max_length=200)
 
 
 class InterviewEvaluateResponse(BaseModel):
@@ -139,7 +139,7 @@ class InterviewEvaluateResponse(BaseModel):
 
 
 class GitHubAnalysisRequest(BaseModel):
-    username: str
+    username: str = Field(pattern=r"^[A-Za-z0-9-]{1,39}$")
 
 
 class GitHubAnalysisResponse(BaseModel):
@@ -154,8 +154,8 @@ class GitHubAnalysisResponse(BaseModel):
 
 
 class RagSearchRequest(BaseModel):
-    query: str
-    k: int = 4
+    query: str = Field(min_length=1, max_length=500)
+    k: int = Field(default=4, ge=1, le=10)
     doc_type: str | None = None
 
 
@@ -174,9 +174,9 @@ class RagSearchResponse(BaseModel):
 
 
 class ChatRequest(BaseModel):
-    message: str
+    message: str = Field(min_length=1, max_length=2000)
     profile: StudentProfile | None = None
-    session_id: str = "default"
+    session_id: str = Field(default="default", max_length=100)
 
 
 class AgentStep(BaseModel):
@@ -192,8 +192,8 @@ class ChatResponse(BaseModel):
 
 class WorkflowRequest(BaseModel):
     profile: StudentProfile
-    job_query: str
-    location: str | None = None
+    job_query: str = Field(min_length=1, max_length=200)
+    location: str | None = Field(default=None, max_length=100)
 
 
 class WorkflowResponse(BaseModel):
