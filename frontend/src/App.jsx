@@ -1,15 +1,29 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
+import { useAuth } from './context/useAuth.js'
+import LoginPage from './components/LoginPage.jsx'
 import Sidebar from './components/Sidebar.jsx'
-import AgentActivityPanel from './components/AgentActivityPanel.jsx'
 import Overview from './components/Overview.jsx'
-import ResumeUpload from './components/ResumeUpload.jsx'
 import JobSearch from './components/JobSearch.jsx'
 import MatchScore from './components/MatchScore.jsx'
 import LearningRoadmap from './components/LearningRoadmap.jsx'
 import InterviewPrep from './components/InterviewPrep.jsx'
+import HistoryPanel from './components/HistoryPanel.jsx'
 import api from './api/client.js'
 
 export default function App() {
+  // All hooks MUST run on every render, in the same order — so they come
+  // before any early return (auth loading / logged-out) below.
+  const { user, loading: authLoading, logout } = useAuth()
+
+  const sessionIdRef = useRef(
+    sessionStorage.getItem('chat_session_id') ||
+      (() => {
+        const id = crypto.randomUUID()
+        sessionStorage.setItem('chat_session_id', id)
+        return id
+      })(),
+  )
+
   const [activeTab, setActiveTab] = useState('overview')
   const [profile, setProfile] = useState(null)
   const [jobs, setJobs] = useState([])
@@ -19,7 +33,6 @@ export default function App() {
   const [skillGap, setSkillGap] = useState(null)
   const [roadmap, setRoadmap] = useState(null)
   const [interviewQuestions, setInterviewQuestions] = useState([])
-  const [steps, setSteps] = useState([])
   const [error, setError] = useState('')
 
   const [resumeLoading, setResumeLoading] = useState(false)
@@ -27,26 +40,22 @@ export default function App() {
   const [matchLoading, setMatchLoading] = useState(false)
   const [roadmapLoading, setRoadmapLoading] = useState(false)
   const [interviewLoading, setInterviewLoading] = useState(false)
-  const [workflowLoading, setWorkflowLoading] = useState(false)
 
-  const pushStep = (agent, action, detail = '') =>
-    setSteps((s) => [...s, { agent, action, detail }])
+  // Now safe to branch — every hook above has already run unconditionally.
+  if (authLoading) return null
+  if (!user) return <LoginPage />
 
   const handleResumeUpload = async (file) => {
-    pushStep('Resume Agent', 'Parsing resume PDF', file.name)
     const res = await api.uploadResume(file)
     setProfile(res.data.profile)
-    pushStep('Resume Agent', 'Profile extracted', res.data.summary)
   }
 
   const handleJobSearch = async (query, location) => {
     setJobSearchLoading(true)
-    pushStep('Job Search (MCP)', 'Calling search_jobs tool', query)
     try {
       const res = await api.searchJobs(query, location)
       setJobs(res.data.jobs)
       setToolUsed(res.data.tool_used)
-      pushStep('Job Search (MCP)', `${res.data.jobs.length} results via ${res.data.tool_used}`)
     } catch (err) {
       setError(err?.response?.data?.detail || 'Job search failed.')
     } finally {
@@ -62,19 +71,33 @@ export default function App() {
     setActiveTab('match')
   }
 
+  const restoreRun = (p) => {
+    setSelectedJob(p.job || null)
+    setJobs(p.job ? [p.job] : [])
+    setMatch(p.match || null)
+    setSkillGap(p.skill_gap || null)
+    setRoadmap(p.roadmap || null)
+    setInterviewQuestions(p.interview_questions || [])
+    setActiveTab('match')
+  }
+
+  const saveSnapshot = (job, parts) => {
+    if (!job) return
+    api.saveHistory({ job, ...parts }).catch(() => {})
+  }
+
   const runMatchAndGap = async () => {
     if (!profile || !selectedJob) return
     setMatchLoading(true)
     try {
-      pushStep('Job Matching Agent', 'Scoring resume against job description', selectedJob.title)
       const matchRes = await api.matchScore(profile, selectedJob)
       setMatch(matchRes.data)
-      pushStep('Job Matching Agent', `Match score: ${matchRes.data.match_score}/100`)
-
-      pushStep('Skill Gap Agent', 'Identifying and prioritizing missing skills')
       const gapRes = await api.skillGap(profile, selectedJob)
       setSkillGap(gapRes.data)
-      pushStep('Skill Gap Agent', `${gapRes.data.missing_skills.length} gaps identified`)
+      saveSnapshot(selectedJob, {
+        match: matchRes.data,
+        skill_gap: gapRes.data,
+      })
     } catch (err) {
       setError(err?.response?.data?.detail || 'Analysis failed.')
     } finally {
@@ -86,10 +109,14 @@ export default function App() {
     if (!skillGap) return
     setRoadmapLoading(true)
     try {
-      pushStep('Learning Recommendation Agent', 'Retrieving learning resources (RAG)', skillGap.priority_order.join(', '))
       const res = await api.learningRoadmap(skillGap.priority_order)
       setRoadmap(res.data)
-      pushStep('Learning Recommendation Agent', `Roadmap built: ~${res.data.total_estimated_weeks} weeks`)
+      saveSnapshot(selectedJob, {
+        match,
+        skill_gap: skillGap,
+        roadmap: res.data,
+        interview_questions: interviewQuestions,
+      })
     } catch (err) {
       setError(err?.response?.data?.detail || 'Roadmap generation failed.')
     } finally {
@@ -100,10 +127,17 @@ export default function App() {
   const generateInterview = async (role) => {
     setInterviewLoading(true)
     try {
-      pushStep('Interview Agent', 'Generating role-specific questions (RAG)', role)
       const res = await api.generateInterview(role, profile)
       setInterviewQuestions(res.data.questions)
-      pushStep('Interview Agent', `${res.data.questions.length} questions generated`)
+      // Only attach questions to the saved job if they were generated for that role.
+      if (selectedJob && role.trim().toLowerCase() === selectedJob.title.toLowerCase()) {
+        saveSnapshot(selectedJob, {
+          match,
+          skill_gap: skillGap,
+          roadmap,
+          interview_questions: res.data.questions,
+        })
+      }
     } catch (err) {
       setError(err?.response?.data?.detail || 'Question generation failed.')
     } finally {
@@ -111,42 +145,14 @@ export default function App() {
     }
   }
 
-  const evaluateAnswer = async (question, answer) => {
-    pushStep('Interview Agent', 'Evaluating candidate answer', question.slice(0, 60) + '…')
-    const res = await api.evaluateAnswer(question, answer, selectedJob?.title || '')
-    pushStep('Interview Agent', `Score: ${res.data.score}/10`)
-    return res.data
-  }
-
-  const runFullWorkflow = async (jobQuery) => {
-    if (!profile) return
-    setWorkflowLoading(true)
-    try {
-      const res = await api.runWorkflow(profile, jobQuery)
-      const data = res.data
-      setSteps((s) => [...s, ...data.steps])
-      if (data.job) { setSelectedJob(data.job); setJobs([data.job]) }
-      if (data.match) setMatch(data.match)
-      if (data.skill_gap) setSkillGap(data.skill_gap)
-      if (data.roadmap) setRoadmap(data.roadmap)
-      if (data.interview_questions) setInterviewQuestions(data.interview_questions)
-      setActiveTab('match')
-    } catch (err) {
-      setError(err?.response?.data?.detail || 'Workflow failed.')
-    } finally {
-      setWorkflowLoading(false)
-    }
-  }
-
   const handleChat = async (message) => {
-    const res = await api.chat(message, profile)
-    setSteps((s) => [...s, ...res.data.steps])
+    const res = await api.chat(message, profile, sessionIdRef.current)
     return res.data.reply
   }
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar active={activeTab} onChange={setActiveTab} />
+      <Sidebar active={activeTab} onChange={setActiveTab} user={user} onLogout={logout} />
 
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-8 py-10">
@@ -159,19 +165,16 @@ export default function App() {
           {activeTab === 'overview' && (
             <Overview
               profile={profile}
-              onRunWorkflow={runFullWorkflow}
-              workflowLoading={workflowLoading}
+              onResumeUploaded={handleResumeUpload}
+              onResumeError={setError}
+              resumeLoading={resumeLoading}
+              setResumeLoading={setResumeLoading}
+              match={match}
+              skillGap={skillGap}
+              roadmap={roadmap}
+              interviewQuestions={interviewQuestions}
               onChat={handleChat}
-            />
-          )}
-
-          {activeTab === 'resume' && (
-            <ResumeUpload
-              profile={profile}
-              onUploaded={handleResumeUpload}
-              onError={setError}
-              loading={resumeLoading}
-              setLoading={setResumeLoading}
+              onNavigate={setActiveTab}
             />
           )}
 
@@ -210,14 +213,13 @@ export default function App() {
               questions={interviewQuestions}
               loading={interviewLoading}
               onGenerate={generateInterview}
-              onEvaluate={evaluateAnswer}
               defaultRole={selectedJob?.title}
             />
           )}
+
+          {activeTab === 'history' && <HistoryPanel onRestore={restoreRun} />}
         </div>
       </main>
-
-      <AgentActivityPanel steps={steps} running={resumeLoading || jobSearchLoading || matchLoading || roadmapLoading || interviewLoading || workflowLoading} />
     </div>
   )
 }

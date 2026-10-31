@@ -1,7 +1,14 @@
 import { useState } from 'react'
 import { Search, Loader2, MapPin, ExternalLink, ArrowRight } from 'lucide-react'
 
-export default function JobSearch({ onSearch, jobs, toolUsed, onSelectJob, selectedJobId, loading }) {
+export default function JobSearch({
+  onSearch,
+  jobs,
+  toolUsed,
+  onSelectJob,
+  selectedJobId,
+  loading,
+}) {
   const [query, setQuery] = useState('')
   const [location, setLocation] = useState('')
 
@@ -25,14 +32,16 @@ export default function JobSearch({ onSearch, jobs, toolUsed, onSelectJob, selec
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          maxLength={200}
           placeholder="e.g. backend engineer intern, python"
-          className="flex-1 text-sm px-3 py-2.5 rounded-md border border-hairline focus:border-cobalt-DEFAULT outline-none"
+          className="flex-1 text-sm px-3 py-2.5 rounded-md border border-hairline focus:border-cobalt outline-none"
         />
         <input
           value={location}
           onChange={(e) => setLocation(e.target.value)}
+          maxLength={100}
           placeholder="Location (optional)"
-          className="w-48 text-sm px-3 py-2.5 rounded-md border border-hairline focus:border-cobalt-DEFAULT outline-none"
+          className="w-48 text-sm px-3 py-2.5 rounded-md border border-hairline focus:border-cobalt outline-none"
         />
         <button type="submit" className="btn-primary" disabled={loading}>
           {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
@@ -52,7 +61,7 @@ export default function JobSearch({ onSearch, jobs, toolUsed, onSelectJob, selec
           return (
             <div
               key={job.id}
-              className={`panel p-5 transition-colors ${isSelected ? 'border-cobalt-DEFAULT ring-1 ring-cobalt-DEFAULT' : ''}`}
+              className={`panel p-5 transition-colors ${isSelected ? 'border-cobalt ring-1 ring-cobalt' : ''}`}
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -68,7 +77,9 @@ export default function JobSearch({ onSearch, jobs, toolUsed, onSelectJob, selec
                   {job.source}
                 </span>
               </div>
-              <p className="text-sm text-ink leading-relaxed mt-3 line-clamp-3">{job.description}</p>
+              <p className="text-sm text-ink leading-relaxed mt-3 line-clamp-3">
+                {job.description}
+              </p>
               <div className="flex items-center gap-3 mt-4">
                 <button
                   onClick={() => onSelectJob(job)}

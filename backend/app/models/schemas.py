@@ -1,10 +1,18 @@
 """Shared Pydantic models for requests, responses, and agent state."""
+
 from __future__ import annotations
-from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
+class RagIngestRequest(BaseModel):
+    text: str = Field(max_length=50_000)
+    source: str = Field(max_length=200)
+    doc_type: str = "user_note"  # ignored; server forces user_note
+
+
 # ---------- Resume / Profile ----------
+
 
 class Education(BaseModel):
     institution: str = ""
@@ -20,7 +28,9 @@ class StudentProfile(BaseModel):
     projects: list[str] = Field(default_factory=list)
     experience: list[str] = Field(default_factory=list)
     certifications: list[str] = Field(default_factory=list)
-    raw_text: str = ""
+    raw_text: str = Field(
+        default="", exclude=True
+    )  # never serialized to client or prompts
 
 
 class ResumeAnalysisResponse(BaseModel):
@@ -29,6 +39,7 @@ class ResumeAnalysisResponse(BaseModel):
 
 
 # ---------- Job search / matching ----------
+
 
 class JobListing(BaseModel):
     id: str
@@ -41,9 +52,9 @@ class JobListing(BaseModel):
 
 
 class JobSearchRequest(BaseModel):
-    query: str
-    location: Optional[str] = None
-    limit: int = 5
+    query: str = Field(min_length=1, max_length=200)
+    location: str | None = Field(default=None, max_length=100)
+    limit: int = Field(default=5, ge=1, le=20)
 
 
 class JobSearchResponse(BaseModel):
@@ -65,6 +76,7 @@ class JobMatchResponse(BaseModel):
 
 # ---------- Skill gap / learning ----------
 
+
 class SkillGapRequest(BaseModel):
     profile: StudentProfile
     job: JobListing
@@ -77,8 +89,8 @@ class SkillGapResponse(BaseModel):
 
 
 class LearningRequest(BaseModel):
-    missing_skills: list[str]
-    context: str = ""
+    missing_skills: list[str] = Field(max_length=30)
+    context: str = Field(default="", max_length=2000)
 
 
 class LearningResource(BaseModel):
@@ -94,15 +106,17 @@ class LearningRoadmapResponse(BaseModel):
 
 # ---------- Interview ----------
 
+
 class InterviewGenerateRequest(BaseModel):
-    role: str
-    profile: Optional[StudentProfile] = None
-    num_questions: int = 5
+    role: str = Field(min_length=1, max_length=200)
+    profile: StudentProfile | None = None
+    num_questions: int = Field(default=5, ge=1, le=10)
 
 
 class InterviewQuestion(BaseModel):
     question: str
     category: str  # "technical" | "behavioral" | "system_design"
+    answer: str = ""
 
 
 class InterviewGenerateResponse(BaseModel):
@@ -110,9 +124,9 @@ class InterviewGenerateResponse(BaseModel):
 
 
 class InterviewEvaluateRequest(BaseModel):
-    question: str
-    answer: str
-    role: str = ""
+    question: str = Field(max_length=2000)
+    answer: str = Field(max_length=10_000)
+    role: str = Field(default="", max_length=200)
 
 
 class InterviewEvaluateResponse(BaseModel):
@@ -123,8 +137,9 @@ class InterviewEvaluateResponse(BaseModel):
 
 # ---------- GitHub (MCP) ----------
 
+
 class GitHubAnalysisRequest(BaseModel):
-    username: str
+    username: str = Field(pattern=r"^[A-Za-z0-9-]{1,39}$")
 
 
 class GitHubAnalysisResponse(BaseModel):
@@ -137,16 +152,11 @@ class GitHubAnalysisResponse(BaseModel):
 
 # ---------- RAG ----------
 
-class RagIngestRequest(BaseModel):
-    text: str
-    source: str
-    doc_type: str = "career_guide"  # resume | job_description | interview_prep | learning_resource | career_guide
-
 
 class RagSearchRequest(BaseModel):
-    query: str
-    k: int = 4
-    doc_type: Optional[str] = None
+    query: str = Field(min_length=1, max_length=500)
+    k: int = Field(default=4, ge=1, le=10)
+    doc_type: str | None = None
 
 
 class RagSearchResult(BaseModel):
@@ -162,10 +172,11 @@ class RagSearchResponse(BaseModel):
 
 # ---------- Orchestrator / chat ----------
 
+
 class ChatRequest(BaseModel):
-    message: str
-    profile: Optional[StudentProfile] = None
-    session_id: str = "default"
+    message: str = Field(min_length=1, max_length=2000)
+    profile: StudentProfile | None = None
+    session_id: str = Field(default="default", max_length=100)
 
 
 class AgentStep(BaseModel):
@@ -181,14 +192,22 @@ class ChatResponse(BaseModel):
 
 class WorkflowRequest(BaseModel):
     profile: StudentProfile
-    job_query: str
-    location: Optional[str] = None
+    job_query: str = Field(min_length=1, max_length=200)
+    location: str | None = Field(default=None, max_length=100)
 
 
 class WorkflowResponse(BaseModel):
     steps: list[AgentStep]
-    job: Optional[JobListing] = None
-    match: Optional[JobMatchResponse] = None
-    skill_gap: Optional[SkillGapResponse] = None
-    roadmap: Optional[LearningRoadmapResponse] = None
+    job: JobListing | None = None
+    match: JobMatchResponse | None = None
+    skill_gap: SkillGapResponse | None = None
+    roadmap: LearningRoadmapResponse | None = None
+    interview_questions: list[InterviewQuestion] = Field(default_factory=list)
+
+
+class HistorySnapshot(BaseModel):
+    job: JobListing
+    match: JobMatchResponse | None = None
+    skill_gap: SkillGapResponse | None = None
+    roadmap: LearningRoadmapResponse | None = None
     interview_questions: list[InterviewQuestion] = Field(default_factory=list)

@@ -3,10 +3,21 @@ import axios from 'axios'
 const client = axios.create({
   baseURL: '/api',
   headers: { 'Content-Type': 'application/json' },
+  withCredentials: true,
 })
+
+client.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401) window.location.reload()
+    return Promise.reject(err)
+  },
+)
 
 export const api = {
   health: () => client.get('/health'),
+  history: () => client.get('/history'),
+  saveHistory: (snapshot) => client.post('/history/snapshot', snapshot),
 
   uploadResume: (file) => {
     const form = new FormData()
@@ -40,8 +51,7 @@ export const api = {
 
   analyzeGithub: (username) => client.post('/github/analyze', { username }),
 
-  ragSearch: (query, k = 4, doc_type = null) =>
-    client.post('/rag/search', { query, k, doc_type }),
+  ragSearch: (query, k = 4, doc_type = null) => client.post('/rag/search', { query, k, doc_type }),
 }
 
 export default api

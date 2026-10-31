@@ -1,18 +1,30 @@
-import { FileText, Search, Target, BookOpen, MessagesSquare, LayoutGrid } from 'lucide-react'
+import { LayoutGrid, Search, Target, BookOpen, MessagesSquare, History, LogOut } from 'lucide-react'
 
 const NAV_ITEMS = [
   { id: 'overview', label: 'Overview', icon: LayoutGrid },
-  { id: 'resume', label: 'Resume & Profile', icon: FileText },
   { id: 'jobs', label: 'Job Search', icon: Search },
   { id: 'match', label: 'Match & Skill Gap', icon: Target },
   { id: 'learning', label: 'Learning Roadmap', icon: BookOpen },
   { id: 'interview', label: 'Interview Prep', icon: MessagesSquare },
+  { id: 'history', label: 'History', icon: History },
 ]
 
-export default function Sidebar({ active, onChange }) {
+function Avatar({ user }) {
+  if (user.picture) {
+    return <img src={user.picture} alt={user.name} className="w-8 h-8 rounded-full shrink-0" />
+  }
+  const initials = (user.name || user.email || '?').charAt(0).toUpperCase()
+  return (
+    <div className="w-8 h-8 rounded-full bg-cobalt-light text-cobalt-dark flex items-center justify-center text-xs font-semibold shrink-0">
+      {initials}
+    </div>
+  )
+}
+
+export default function Sidebar({ active, onChange, user, onLogout }) {
   return (
     <aside className="w-60 shrink-0 border-r border-hairline bg-panel flex flex-col">
-      <div className="px-5 py-6 border-b border-hairline">
+      <div className="px-5 py-6 border-b border-hairline border-t-[3px] border-t-cobalt">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-md bg-ink flex items-center justify-center">
             <span className="text-white font-display font-semibold text-sm">W</span>
@@ -40,9 +52,19 @@ export default function Sidebar({ active, onChange }) {
         })}
       </nav>
 
-      <div className="px-5 py-4 border-t border-hairline">
-        <p className="eyebrow">Agents online</p>
-        <p className="text-xs text-muted mt-1 font-mono">6 / 6 configured</p>
+      <div className="px-4 py-4 border-t border-hairline flex items-center gap-2.5">
+        <Avatar user={user} />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate leading-tight">{user.name}</p>
+          <p className="text-xs text-muted truncate">{user.email}</p>
+        </div>
+        <button
+          onClick={onLogout}
+          className="text-muted hover:text-signal-red shrink-0"
+          title="Log out"
+        >
+          <LogOut size={15} />
+        </button>
       </div>
     </aside>
   )
