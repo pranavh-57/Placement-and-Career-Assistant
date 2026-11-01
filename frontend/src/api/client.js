@@ -16,7 +16,7 @@ const notifySlow = () =>
 
 const pending = new WeakMap() // request config -> { timer, slow }
 
-const settle = (config) => {
+const settle = (/** @type {object} */ config) => {
   const entry = pending.get(config)
   if (!entry) return
   clearTimeout(entry.timer)
@@ -51,15 +51,14 @@ client.interceptors.response.use(
 )
 
 export const api = {
-  health: () => client.get('/health'),
   history: () => client.get('/history'),
-  saveHistory: (snapshot) => client.post('/history/snapshot', snapshot),
+  saveHistory: (/** @type {any} */ snapshot) => client.post('/history/snapshot', snapshot),
 
   getProfile: () => client.get('/profile'),
-  saveProfile: (profile) => client.put('/profile', profile),
+  saveProfile: (/** @type {any} */ profile) => client.put('/profile', profile),
   deleteMyData: () => client.delete('/me/data'),
 
-  uploadResume: (file) => {
+  uploadResume: (/** @type {string | Blob} */ file) => {
     const form = new FormData()
     form.append('file', file)
     return client.post('/resume/upload', form, {
@@ -67,41 +66,41 @@ export const api = {
     })
   },
 
-  searchJobs: (query, location, limit = 5, job_type = 'any') =>
-    client.post('/jobs/search', { query, location, limit, job_type }),
+  searchJobs: (
+    /** @type {any} */ query,
+    /** @type {any} */ location,
+    limit = 5,
+    job_type = 'any',
+  ) => client.post('/jobs/search', { query, location, limit, job_type }),
 
   savedJobs: () => client.get('/saved-jobs'),
 
-  saveJob: (job, status = 'saved') => client.post('/saved-jobs', { job, status }),
+  saveJob: (/** @type {any} */ job, status = 'saved') =>
+    client.post('/saved-jobs', { job, status }),
 
-  updateSavedJob: (id, patch) => client.patch(`/saved-jobs/${id}`, patch),
+  updateSavedJob: (/** @type {any} */ id, /** @type {any} */ patch) =>
+    client.patch(`/saved-jobs/${id}`, patch),
 
-  removeSavedJob: (id) => client.delete(`/saved-jobs/${id}`),
+  removeSavedJob: (/** @type {any} */ id) => client.delete(`/saved-jobs/${id}`),
 
-  campusDrives: (params) => client.get('/campus/drives', { params }),
+  campusDrives: (/** @type {any} */ params) => client.get('/campus/drives', { params }),
 
-  matchScore: (profile, job) => client.post('/matching/score', { profile, job }),
+  matchScore: (/** @type {any} */ profile, /** @type {any} */ job) =>
+    client.post('/matching/score', { profile, job }),
 
-  skillGap: (profile, job) => client.post('/skills/gap', { profile, job }),
+  skillGap: (/** @type {any} */ profile, /** @type {any} */ job) =>
+    client.post('/skills/gap', { profile, job }),
 
-  learningRoadmap: (missing_skills, context = '') =>
+  learningRoadmap: (/** @type {any} */ missing_skills, context = '') =>
     client.post('/learning/roadmap', { missing_skills, context }),
 
-  generateInterview: (role, profile, num_questions = 5) =>
+  generateInterview: (/** @type {any} */ role, /** @type {any} */ profile, num_questions = 5) =>
     client.post('/interview/generate', { role, profile, num_questions }),
 
-  evaluateAnswer: (question, answer, role = '') =>
-    client.post('/interview/evaluate', { question, answer, role }),
-
-  chat: (message, profile, session_id = 'default') =>
+  chat: (/** @type {any} */ message, /** @type {any} */ profile, session_id = 'default') =>
     client.post('/chat', { message, profile, session_id }),
 
-  runWorkflow: (profile, job_query, location = '') =>
-    client.post('/workflow/run', { profile, job_query, location }),
-
-  analyzeGithub: (username) => client.post('/github/analyze', { username }),
-
-  ragSearch: (query, k = 4, doc_type = null) => client.post('/rag/search', { query, k, doc_type }),
+  analyzeGithub: (/** @type {any} */ username) => client.post('/github/analyze', { username }),
 }
 
 export default api

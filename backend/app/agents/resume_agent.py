@@ -46,5 +46,4 @@ def run_resume_agent(resume_text: str) -> StudentProfile:
         projects=data.projects,
         experience=data.experience,
         certifications=data.certifications,
-        raw_text=resume_text,
     )

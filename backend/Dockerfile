@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 RUN useradd -m app \
-    && mkdir -p /app/data/chroma /app/data/uploads \
+    && mkdir -p /app/data/chroma \
     && chown -R app:app /app
 USER app
 

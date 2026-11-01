@@ -6,13 +6,6 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-
-class RagIngestRequest(BaseModel):
-    text: str = Field(max_length=50_000)
-    source: str = Field(max_length=200)
-    doc_type: str = "user_note"  # ignored; server forces user_note
-
-
 # ---------- Resume / Profile ----------
 
 
@@ -30,9 +23,6 @@ class StudentProfile(BaseModel):
     projects: list[str] = Field(default_factory=list)
     experience: list[str] = Field(default_factory=list)
     certifications: list[str] = Field(default_factory=list)
-    raw_text: str = Field(
-        default="", exclude=True
-    )  # never serialized to client or prompts
 
 
 class ResumeAnalysisResponse(BaseModel):
