@@ -1,8 +1,11 @@
 import asyncio
 
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
+from sqlalchemy.orm import Session
 
 from app.agents.resume_agent import run_resume_agent
+from app.api.routes_profile import save_user_profile
+from app.auth.db import get_db
 from app.auth.dependencies import get_current_user
 from app.auth.models import User
 from app.config import settings
@@ -22,6 +25,7 @@ async def upload_resume(
     request: Request,
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     filename = file.filename or ""
     file_bytes = await file.read(MAX_UPLOAD_BYTES + 1)  # bounded read
@@ -54,6 +58,7 @@ async def upload_resume(
     # Replace (not append to) this user's previous resume in the vector store.
     await asyncio.to_thread(delete_user_documents, current_user.id, "resume")
     await asyncio.to_thread(add_document, text, filename, "resume", current_user.id)
+    save_user_profile(db, current_user.id, profile)
 
     summary = (
         f"Extracted {len(profile.skills)} skills, {len(profile.projects)} projects, "

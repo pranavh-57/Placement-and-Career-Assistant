@@ -74,3 +74,39 @@ def client(db_session, test_user):
     app.dependency_overrides[get_current_user] = override_get_current_user
     yield TestClient(app)
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(autouse=True)
+def _reset_rate_limits():
+    """The suite makes many requests from one 'IP'; don't let slowapi throttle it."""
+    from app.rate_limit import limiter
+
+    limiter.reset()
+    yield
+
+
+@pytest.fixture()
+def other_user(db_session):
+    import uuid
+
+    unique = uuid.uuid4().hex[:8]
+    user = User(
+        google_id=f"other-{unique}",
+        email=f"other-{unique}@example.com",
+        name="Other User",
+        picture=None,
+    )
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+    return user
+
+
+@pytest.fixture()
+def as_user(client):
+    """Switch the authenticated user mid-test: `as_user(other_user)`."""
+
+    def _switch(user):
+        app.dependency_overrides[get_current_user] = lambda: user
+
+    return _switch

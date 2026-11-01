@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PanelSkeleton } from './Skeleton.jsx'
 import { Loader2, MessagesSquare, ChevronDown, ChevronUp } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 
@@ -77,6 +78,9 @@ export default function InterviewPrep({ questions, loading, onGenerate, defaultR
       </div>
 
       <div className="space-y-3">
+        {loading && questions.length === 0 && (
+          <PanelSkeleton lines={4} note="Writing role-specific questions…" />
+        )}
         {questions.map((q, i) => (
           <QuestionCard key={i} q={q} index={i} />
         ))}

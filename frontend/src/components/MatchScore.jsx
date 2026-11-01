@@ -1,4 +1,5 @@
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react'
+import { PanelSkeleton } from './Skeleton.jsx'
 
 function ScoreRing({ score }) {
   const radius = 46
@@ -66,6 +67,9 @@ export default function MatchScore({ job, match, skillGap, loading, onAnalyze })
         </button>
       </div>
 
+      {loading && !match && (
+        <PanelSkeleton lines={4} note="Comparing your profile with this job. This can take up to 30 seconds." />
+      )}
       {match && (
         <div className="panel p-6 flex items-center gap-8">
           <ScoreRing score={match.match_score} />

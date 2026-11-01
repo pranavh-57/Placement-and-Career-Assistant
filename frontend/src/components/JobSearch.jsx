@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Search, Loader2, MapPin, ExternalLink, ArrowRight } from 'lucide-react'
+import { PanelSkeleton } from './Skeleton.jsx'
+import { Search, Loader2, MapPin, ExternalLink, ArrowRight, Bookmark, BookmarkCheck } from 'lucide-react'
+
 
 export default function JobSearch({
   onSearch,
@@ -8,14 +10,17 @@ export default function JobSearch({
   onSelectJob,
   selectedJobId,
   loading,
+  savedIds,
+  onToggleSave,
 }) {
   const [query, setQuery] = useState('')
   const [location, setLocation] = useState('')
+  const [jobType, setJobType] = useState('any')
 
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!query.trim()) return
-    onSearch(query, location)
+    onSearch(query, location, jobType)
   }
 
   return (
@@ -43,6 +48,16 @@ export default function JobSearch({
           placeholder="Location (optional)"
           className="w-48 text-sm px-3 py-2.5 rounded-md border border-hairline focus:border-cobalt outline-none"
         />
+        <select
+          value={jobType}
+          onChange={(e) => setJobType(e.target.value)}
+          aria-label="Job type"
+          className="text-sm px-3 py-2.5 rounded-md border border-hairline focus:border-cobalt outline-none bg-white"
+        >
+          <option value="any">Any type</option>
+          <option value="internship">Internship</option>
+          <option value="full-time">Full-time</option>
+        </select>
         <button type="submit" className="btn-primary" disabled={loading}>
           {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
           Search
@@ -56,7 +71,10 @@ export default function JobSearch({
       )}
 
       <div className="space-y-3">
-        {jobs.map((job) => {
+        {loading ? (
+          <PanelSkeleton lines={3} note="Searching for roles…" />
+        ) : (
+          jobs.map((job) => {
           const isSelected = selectedJobId === job.id
           return (
             <div
@@ -88,6 +106,20 @@ export default function JobSearch({
                   {isSelected ? 'Selected for matching' : 'Analyze this job'}
                   <ArrowRight size={13} />
                 </button>
+                <button
+                  onClick={() => onToggleSave(job)}
+                  className="text-xs text-muted hover:text-cobalt-dark flex items-center gap-1"
+                >
+                  {savedIds.has(job.id) ? (
+                    <>
+                      <BookmarkCheck size={13} className="text-cobalt" /> Saved
+                    </>
+                  ) : (
+                    <>
+                      <Bookmark size={13} /> Save
+                    </>
+                  )}
+                </button>
                 {job.url && job.url !== '' && (
                   <a
                     href={job.url}
@@ -101,7 +133,8 @@ export default function JobSearch({
               </div>
             </div>
           )
-        })}
+          })
+        )}
         {jobs.length === 0 && !loading && (
           <p className="text-sm text-muted">No results yet — try a search above.</p>
         )}

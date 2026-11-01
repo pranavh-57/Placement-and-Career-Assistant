@@ -1,11 +1,16 @@
-import { LayoutGrid, Search, Target, BookOpen, MessagesSquare, History, LogOut } from 'lucide-react'
+import {
+  LayoutGrid, Search, Target, BookOpen, MessagesSquare, History, LogOut,
+  ClipboardList, CalendarDays,
+} from 'lucide-react'
 
 const NAV_ITEMS = [
   { id: 'overview', label: 'Overview', icon: LayoutGrid },
-  { id: 'jobs', label: 'Job Search', icon: Search },
-  { id: 'match', label: 'Match & Skill Gap', icon: Target },
-  { id: 'learning', label: 'Learning Roadmap', icon: BookOpen },
-  { id: 'interview', label: 'Interview Prep', icon: MessagesSquare },
+  { id: 'jobs', label: 'Job Search', icon: Search, requires: 'profile', hint: 'Upload your resume first' },
+  { id: 'calendar', label: 'Placement Calendar', icon: CalendarDays },
+  { id: 'tracker', label: 'Application Tracker', icon: ClipboardList },
+  { id: 'match', label: 'Match & Skill Gap', icon: Target, requires: 'job', hint: 'Select a job first' },
+  { id: 'learning', label: 'Learning Roadmap', icon: BookOpen, requires: 'match', hint: 'Run a match analysis first' },
+  { id: 'interview', label: 'Interview Prep', icon: MessagesSquare, requires: 'profile', hint: 'Upload your resume first' },
   { id: 'history', label: 'History', icon: History },
 ]
 
@@ -21,7 +26,7 @@ function Avatar({ user }) {
   )
 }
 
-export default function Sidebar({ active, onChange, user, onLogout }) {
+export default function Sidebar({ active, onChange, user, onLogout, ready = {} }) {
   return (
     <aside className="w-60 shrink-0 border-r border-hairline bg-panel flex flex-col">
       <div className="px-5 py-6 border-b border-hairline border-t-[3px] border-t-cobalt">
@@ -38,12 +43,21 @@ export default function Sidebar({ active, onChange, user, onLogout }) {
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon
           const isActive = active === item.id
+          const locked = item.requires && !ready[item.requires]
           return (
             <button
               key={item.id}
-              onClick={() => onChange(item.id)}
+              onClick={() => !locked && onChange(item.id)}
+              disabled={locked}
+              title={locked ? item.hint : undefined}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium transition-colors
-                ${isActive ? 'bg-cobalt-light text-cobalt-dark' : 'text-muted hover:bg-paper hover:text-ink'}`}
+                ${
+                  locked
+                    ? 'text-muted/50 cursor-not-allowed'
+                    : isActive
+                      ? 'bg-cobalt-light text-cobalt-dark'
+                      : 'text-muted hover:bg-paper hover:text-ink'
+                }`}
             >
               <Icon size={16} strokeWidth={2} />
               {item.label}

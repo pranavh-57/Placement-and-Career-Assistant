@@ -1,20 +1,19 @@
 import { useState } from 'react'
 import { Loader2, Send, Target, ListChecks, BookOpen, MessageSquare, Sparkles } from 'lucide-react'
 import ResumeUpload from './ResumeUpload.jsx'
+import { friendlyError } from '../utils/errors.js'
+import DeleteDataButton from './DeleteDataButton.jsx'
 import StatCard from './StatCard.jsx'
+import GitHubCard from './GitHubCard.jsx'
 import ReactMarkdown from 'react-markdown'
 
-function errorText(err) {
-  const detail = err?.response?.data?.detail
-  return typeof detail === 'string' && detail
-    ? detail
-    : 'Sorry, something went wrong. Please try again.'
-}
 
 export default function Overview({
   profile,
   onResumeUploaded,
   onResumeError,
+  onProfileChange,
+  onDeleteData,
   resumeLoading,
   setResumeLoading,
   match,
@@ -39,7 +38,7 @@ export default function Overview({
       const reply = await onChat(message)
       setChatLog((log) => [...log, { role: 'assistant', text: reply }])
     } catch (err) {
-      setChatLog((log) => [...log, { role: 'assistant', text: errorText(err) }])
+      setChatLog((log) => [...log, { role: 'assistant', text: friendlyError(err) }])
     } finally {
       setChatLoading(false)
     }
@@ -106,8 +105,14 @@ export default function Overview({
         profile={profile}
         onUploaded={onResumeUploaded}
         onError={onResumeError}
+        onProfileChange={onProfileChange}
         loading={resumeLoading}
         setLoading={setResumeLoading}
+      />
+
+      <GitHubCard
+        profile={profile}
+        onProfileChange={onProfileChange}
       />
 
       <div>
@@ -154,6 +159,10 @@ export default function Overview({
             </button>
           </form>
         </div>
+      </div>
+
+      <div className="pt-6 border-t border-hairline">
+        <DeleteDataButton onDelete={onDeleteData} />
       </div>
     </div>
   )

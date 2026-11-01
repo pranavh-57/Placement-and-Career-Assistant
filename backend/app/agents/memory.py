@@ -31,3 +31,9 @@ def add_turn(user_id: int, session_id: str, user_text: str, ai_text: str) -> Non
     _sessions.move_to_end(key)
     while len(_sessions) > MAX_SESSIONS:
         _sessions.popitem(last=False)
+
+
+def clear_user(user_id: int) -> None:
+    """Forget all in-memory chat sessions for a user."""
+    for key in [k for k in _sessions if k[0] == user_id]:
+        del _sessions[key]
