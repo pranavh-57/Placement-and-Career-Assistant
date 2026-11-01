@@ -14,22 +14,27 @@ let slowCount = 0
 const notifySlow = () =>
   window.dispatchEvent(new CustomEvent('wayfind:slow', { detail: slowCount > 0 }))
 
+const pending = new WeakMap() // request config -> { timer, slow }
+
 const settle = (config) => {
-  if (!config) return
-  clearTimeout(config._slowTimer)
-  if (config._isSlow) {
-    config._isSlow = false
+  const entry = pending.get(config)
+  if (!entry) return
+  clearTimeout(entry.timer)
+  if (entry.slow) {
     slowCount -= 1
     notifySlow()
   }
+  pending.delete(config)
 }
 
 client.interceptors.request.use((config) => {
-  config._slowTimer = setTimeout(() => {
-    config._isSlow = true
+  const entry = { slow: false, timer: null }
+  entry.timer = setTimeout(() => {
+    entry.slow = true
     slowCount += 1
     notifySlow()
   }, SLOW_MS)
+  pending.set(config, entry)
   return config
 })
 

@@ -28,7 +28,9 @@ export default function SkillsEditor({ skills = [], onChange }) {
 
   return (
     <div>
-      <p className="eyebrow mb-2">Skills ({skills.length}) — click × to remove, or add missing ones</p>
+      <p className="eyebrow mb-2">
+        Skills ({skills.length}) — click × to remove, or add missing ones
+      </p>
       <div className="flex flex-wrap gap-1.5">
         {skills.map((s, i) => (
           <span

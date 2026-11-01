@@ -48,13 +48,19 @@ export default function GitHubCard({ profile, onProfileChange }) {
   const addSkills = () => {
     const fresh = mergeUnique(profile.skills, result.top_languages)
     if (fresh.length) onProfileChange({ ...profile, skills: [...profile.skills, ...fresh] })
-    setNotice(fresh.length ? `Added ${fresh.length} skill(s) to your profile.` : 'Already in your profile.')
+    setNotice(
+      fresh.length ? `Added ${fresh.length} skill(s) to your profile.` : 'Already in your profile.',
+    )
   }
 
   const addProjects = () => {
     const fresh = mergeUnique(profile.projects, result.notable_repos)
     if (fresh.length) onProfileChange({ ...profile, projects: [...profile.projects, ...fresh] })
-    setNotice(fresh.length ? `Added ${fresh.length} project(s) to your profile.` : 'Already in your profile.')
+    setNotice(
+      fresh.length
+        ? `Added ${fresh.length} project(s) to your profile.`
+        : 'Already in your profile.',
+    )
   }
 
   return (
@@ -92,7 +98,10 @@ export default function GitHubCard({ profile, onProfileChange }) {
             <p className="eyebrow mb-2">Top languages</p>
             <div className="flex flex-wrap gap-1.5">
               {result.top_languages.map((l) => (
-                <span key={l} className="text-xs font-mono px-2 py-1 rounded bg-paper border border-hairline">
+                <span
+                  key={l}
+                  className="text-xs font-mono px-2 py-1 rounded bg-paper border border-hairline"
+                >
                   {l}
                 </span>
               ))}
@@ -104,7 +113,9 @@ export default function GitHubCard({ profile, onProfileChange }) {
               <p className="eyebrow mb-2">Notable repos ({result.public_repos} public)</p>
               <ul className="space-y-1">
                 {result.notable_repos.map((r) => (
-                  <li key={r} className="text-sm">· {r}</li>
+                  <li key={r} className="text-sm">
+                    · {r}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -112,16 +123,26 @@ export default function GitHubCard({ profile, onProfileChange }) {
 
           {profile ? (
             <div className="flex flex-wrap items-center gap-2">
-              <button type="button" onClick={addSkills} className="btn-secondary !px-3 !py-1.5 text-xs">
+              <button
+                type="button"
+                onClick={addSkills}
+                className="btn-secondary !px-3 !py-1.5 text-xs"
+              >
                 Add languages to my skills
               </button>
-              <button type="button" onClick={addProjects} className="btn-secondary !px-3 !py-1.5 text-xs">
+              <button
+                type="button"
+                onClick={addProjects}
+                className="btn-secondary !px-3 !py-1.5 text-xs"
+              >
                 Add repos to my projects
               </button>
               {notice && <span className="text-xs text-muted">{notice}</span>}
             </div>
           ) : (
-            <p className="text-xs text-muted">Upload your resume first to add these to your profile.</p>
+            <p className="text-xs text-muted">
+              Upload your resume first to add these to your profile.
+            </p>
           )}
         </div>
       )}

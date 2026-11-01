@@ -57,6 +57,12 @@ async function mockApi(page, { authed = true } = {}) {
           return json(GAP)
         case '/api/history/snapshot':
           return json({ status: 'saved' })
+        case '/api/profile':
+          return json({ profile: null })
+        case '/api/saved-jobs':
+          return json([])
+        case '/api/campus/drives':
+          return json([])
         default:
           return json({ detail: `unmocked ${pathname}` }, 404)
       }
@@ -80,7 +86,7 @@ test('upload resume, search a job, run the match analysis', async ({ page }) => 
     mimeType: 'application/pdf',
     buffer: Buffer.from('%PDF-1.4 fake'),
   })
-  await expect(page.getByText('Profile extracted')).toBeVisible()
+  await expect(page.getByText('Profile saved')).toBeVisible()
 
   await page.getByRole('button', { name: 'Job Search' }).click()
   await page.getByPlaceholder(/backend engineer intern/i).fill('backend intern')

@@ -37,7 +37,13 @@ function ScoreRing({ score }) {
   )
 }
 
-export default function MatchScore({ job, match, skillGap, loading, onAnalyze }) {
+export default function MatchScore({
+  job,
+  match = null,
+  skillGap = null,
+  loading = false,
+  onAnalyze,
+}) {
   if (!job) {
     return (
       <div className="space-y-6">
@@ -68,7 +74,10 @@ export default function MatchScore({ job, match, skillGap, loading, onAnalyze })
       </div>
 
       {loading && !match && (
-        <PanelSkeleton lines={4} note="Comparing your profile with this job. This can take up to 30 seconds." />
+        <PanelSkeleton
+          lines={4}
+          note="Comparing your profile with this job. This can take up to 30 seconds."
+        />
       )}
       {match && (
         <div className="panel p-6 flex items-center gap-8">

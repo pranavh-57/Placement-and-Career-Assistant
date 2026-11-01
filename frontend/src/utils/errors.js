@@ -14,6 +14,7 @@ export function friendlyError(err, fallback = 'Something went wrong. Please try 
   if (typeof detail === 'string' && detail) return detail
   if (status === 401) return 'Your session expired. Please sign in again.'
   if (status === 413) return 'That file is too large. Try a smaller resume.'
-  if (status === 422) return 'Some of your input is invalid or too long. Please check it and try again.'
+  if (status === 422)
+    return 'Some of your input is invalid or too long. Please check it and try again.'
   return fallback
 }

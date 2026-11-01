@@ -7,6 +7,8 @@ vi.mock('../api/client.js', () => ({ default: { history: vi.fn() } }))
 import api from '../api/client.js'
 import HistoryPanel from './HistoryPanel.jsx'
 
+const mockHistory = /** @type {any} */ (api.history)
+
 describe('HistoryPanel', () => {
   it('lists analyses and restores one', async () => {
     const payload = {
@@ -14,7 +16,7 @@ describe('HistoryPanel', () => {
       match: { match_score: 80 },
       skill_gap: { missing_skills: ['Docker'] },
     }
-    api.history.mockResolvedValue({
+    mockHistory.mockResolvedValue({
       data: [
         {
           id: 1,
@@ -34,7 +36,7 @@ describe('HistoryPanel', () => {
   })
 
   it('shows an empty state', async () => {
-    api.history.mockResolvedValue({ data: [] })
+    mockHistory.mockResolvedValue({ data: [] })
     render(<HistoryPanel onRestore={vi.fn()} />)
     expect(await screen.findByText(/nothing yet/i)).toBeInTheDocument()
   })

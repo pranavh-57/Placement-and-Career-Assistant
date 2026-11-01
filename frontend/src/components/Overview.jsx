@@ -7,7 +7,6 @@ import StatCard from './StatCard.jsx'
 import GitHubCard from './GitHubCard.jsx'
 import ReactMarkdown from 'react-markdown'
 
-
 export default function Overview({
   profile,
   onResumeUploaded,
@@ -110,10 +109,7 @@ export default function Overview({
         setLoading={setResumeLoading}
       />
 
-      <GitHubCard
-        profile={profile}
-        onProfileChange={onProfileChange}
-      />
+      <GitHubCard profile={profile} onProfileChange={onProfileChange} />
 
       <div>
         <div className="flex items-center gap-1.5 mb-1">
@@ -121,7 +117,8 @@ export default function Overview({
           <p className="eyebrow">AI Assistant</p>
         </div>
         <p className="text-xs text-muted mb-4">
-          Try  `&ldquo;find me jobs in fintech&rdquo;` or `&ldquo;analyze github user torvalds&rdquo;`.
+          Try `&ldquo;find me jobs in fintech&rdquo;` or `&ldquo;analyze github user
+          torvalds&rdquo;`.
         </p>
         <div className="panel p-5">
           <div className="space-y-3 max-h-72 overflow-y-auto mb-4 flex flex-col">

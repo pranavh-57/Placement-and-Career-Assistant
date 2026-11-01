@@ -1,16 +1,47 @@
 import {
-  LayoutGrid, Search, Target, BookOpen, MessagesSquare, History, LogOut,
-  ClipboardList, CalendarDays,
+  LayoutGrid,
+  Search,
+  Target,
+  BookOpen,
+  MessagesSquare,
+  History,
+  LogOut,
+  ClipboardList,
+  CalendarDays,
 } from 'lucide-react'
 
 const NAV_ITEMS = [
   { id: 'overview', label: 'Overview', icon: LayoutGrid },
-  { id: 'jobs', label: 'Job Search', icon: Search, requires: 'profile', hint: 'Upload your resume first' },
+  {
+    id: 'jobs',
+    label: 'Job Search',
+    icon: Search,
+    requires: 'profile',
+    hint: 'Upload your resume first',
+  },
   { id: 'calendar', label: 'Placement Calendar', icon: CalendarDays },
   { id: 'tracker', label: 'Application Tracker', icon: ClipboardList },
-  { id: 'match', label: 'Match & Skill Gap', icon: Target, requires: 'job', hint: 'Select a job first' },
-  { id: 'learning', label: 'Learning Roadmap', icon: BookOpen, requires: 'match', hint: 'Run a match analysis first' },
-  { id: 'interview', label: 'Interview Prep', icon: MessagesSquare, requires: 'profile', hint: 'Upload your resume first' },
+  {
+    id: 'match',
+    label: 'Match & Skill Gap',
+    icon: Target,
+    requires: 'job',
+    hint: 'Select a job first',
+  },
+  {
+    id: 'learning',
+    label: 'Learning Roadmap',
+    icon: BookOpen,
+    requires: 'match',
+    hint: 'Run a match analysis first',
+  },
+  {
+    id: 'interview',
+    label: 'Interview Prep',
+    icon: MessagesSquare,
+    requires: 'profile',
+    hint: 'Upload your resume first',
+  },
   { id: 'history', label: 'History', icon: History },
 ]
 

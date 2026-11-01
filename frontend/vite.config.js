@@ -15,5 +15,11 @@ export default defineConfig({
     setupFiles: './src/test/setup.js',
     include: ['src/**/*.test.{js,jsx}'], // keeps Vitest away from e2e/*.spec.js
     css: false,
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{js,jsx}'],
+      exclude: ['src/**/*.test.{js,jsx}', 'src/test/**', 'src/main.jsx'],
+      reporter: ['text', 'html'],
+    },
   },
 })

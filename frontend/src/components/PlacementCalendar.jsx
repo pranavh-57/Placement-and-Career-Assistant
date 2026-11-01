@@ -75,7 +75,10 @@ export default function PlacementCalendar({ savedIds, onToggleSave }) {
   }
 
   const set = (key) => (e) =>
-    setDraft((d) => ({ ...d, [key]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }))
+    setDraft((d) => ({
+      ...d,
+      [key]: e.target.type === 'checkbox' ? e.target.checked : e.target.value,
+    }))
 
   const visible = (drives || []).filter((d) => !(hideIneligible && !d.eligible))
   const checking = applied.branch || applied.cgpa !== ''
@@ -93,7 +96,11 @@ export default function PlacementCalendar({ savedIds, onToggleSave }) {
       <form onSubmit={submit} className="panel p-4 grid grid-cols-2 gap-3">
         <label className="text-xs text-muted space-y-1">
           Type
-          <select value={draft.jobType} onChange={set('jobType')} className="w-full text-sm px-3 py-2 rounded-md border border-hairline bg-white outline-none focus:border-cobalt">
+          <select
+            value={draft.jobType}
+            onChange={set('jobType')}
+            className="w-full text-sm px-3 py-2 rounded-md border border-hairline bg-white outline-none focus:border-cobalt"
+          >
             <option value="any">Internships & full-time</option>
             <option value="internship">Internship</option>
             <option value="full-time">Full-time</option>
@@ -101,7 +108,11 @@ export default function PlacementCalendar({ savedIds, onToggleSave }) {
         </label>
         <label className="text-xs text-muted space-y-1">
           Branch
-          <select value={draft.branch} onChange={set('branch')} className="w-full text-sm px-3 py-2 rounded-md border border-hairline bg-white outline-none focus:border-cobalt">
+          <select
+            value={draft.branch}
+            onChange={set('branch')}
+            className="w-full text-sm px-3 py-2 rounded-md border border-hairline bg-white outline-none focus:border-cobalt"
+          >
             <option value="">Not set</option>
             {BRANCHES.map((b) => (
               <option key={b}>{b}</option>
@@ -110,20 +121,41 @@ export default function PlacementCalendar({ savedIds, onToggleSave }) {
         </label>
         <label className="text-xs text-muted space-y-1">
           My CGPA (0–10)
-          <input type="number" min="0" max="10" step="0.01" value={draft.cgpa} onChange={set('cgpa')} placeholder="e.g. 7.8" className="w-full text-sm px-3 py-2 rounded-md border border-hairline outline-none focus:border-cobalt" />
+          <input
+            type="number"
+            min="0"
+            max="10"
+            step="0.01"
+            value={draft.cgpa}
+            onChange={set('cgpa')}
+            placeholder="e.g. 7.8"
+            className="w-full text-sm px-3 py-2 rounded-md border border-hairline outline-none focus:border-cobalt"
+          />
         </label>
         <label className="text-xs text-muted space-y-1">
           Location
-          <input value={draft.location} onChange={set('location')} maxLength={100} placeholder="e.g. Bengaluru (remote always shown)" className="w-full text-sm px-3 py-2 rounded-md border border-hairline outline-none focus:border-cobalt" />
+          <input
+            value={draft.location}
+            onChange={set('location')}
+            maxLength={100}
+            placeholder="e.g. Bengaluru (remote always shown)"
+            className="w-full text-sm px-3 py-2 rounded-md border border-hairline outline-none focus:border-cobalt"
+          />
         </label>
         <div className="col-span-2 flex flex-wrap items-center gap-4">
-          <button type="submit" className="btn-primary">Apply filters</button>
+          <button type="submit" className="btn-primary">
+            Apply filters
+          </button>
           <label className="text-xs text-muted flex items-center gap-1.5">
             <input type="checkbox" checked={draft.includePast} onChange={set('includePast')} />
             Show past drives
           </label>
           <label className="text-xs text-muted flex items-center gap-1.5">
-            <input type="checkbox" checked={hideIneligible} onChange={(e) => setHideIneligible(e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={hideIneligible}
+              onChange={(e) => setHideIneligible(e.target.checked)}
+            />
             Hide drives I&apos;m not eligible for
           </label>
         </div>
@@ -159,7 +191,9 @@ export default function PlacementCalendar({ savedIds, onToggleSave }) {
                 </div>
 
                 <p className="text-xs text-muted flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <span className="flex items-center gap-1"><MapPin size={11} /> {d.location}</span>
+                  <span className="flex items-center gap-1">
+                    <MapPin size={11} /> {d.location}
+                  </span>
                   {d.pay && <span>{d.pay}</span>}
                   <span>Min CGPA {d.min_cgpa ?? '—'}</span>
                   <span>{d.branches.join(', ')}</span>
@@ -169,29 +203,55 @@ export default function PlacementCalendar({ savedIds, onToggleSave }) {
 
                 <div className="flex flex-wrap items-center gap-2 text-xs">
                   {!checking ? (
-                    <span className="px-2 py-1 rounded bg-paper text-muted">Set branch & CGPA to check eligibility</span>
+                    <span className="px-2 py-1 rounded bg-paper text-muted">
+                      Set branch & CGPA to check eligibility
+                    </span>
                   ) : d.eligible ? (
-                    <span className="px-2 py-1 rounded bg-signal-green/10 text-signal-green">You&apos;re eligible</span>
+                    <span className="px-2 py-1 rounded bg-signal-green/10 text-signal-green">
+                      You&apos;re eligible
+                    </span>
                   ) : (
                     d.reasons.map((r) => (
-                      <span key={r} className="px-2 py-1 rounded bg-signal-red/10 text-signal-red">{r}</span>
+                      <span key={r} className="px-2 py-1 rounded bg-signal-red/10 text-signal-red">
+                        {r}
+                      </span>
                     ))
                   )}
                   <span className="text-muted">
                     Apply by {d.apply_by}
-                    {d.days_left >= 0 && ` · ${d.days_left === 0 ? 'today' : `${d.days_left}d to drive`}`}
+                    {d.days_left >= 0 &&
+                      ` · ${d.days_left === 0 ? 'today' : `${d.days_left}d to drive`}`}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-4 pt-1">
-                  <button onClick={() => onToggleSave(driveToJob(d))} className="text-xs text-muted hover:text-cobalt-dark flex items-center gap-1">
-                    {saved ? <><BookmarkCheck size={13} className="text-cobalt" /> In tracker</> : <><Bookmark size={13} /> Add to tracker</>}
+                  <button
+                    onClick={() => onToggleSave(driveToJob(d))}
+                    className="text-xs text-muted hover:text-cobalt-dark flex items-center gap-1"
+                  >
+                    {saved ? (
+                      <>
+                        <BookmarkCheck size={13} className="text-cobalt" /> In tracker
+                      </>
+                    ) : (
+                      <>
+                        <Bookmark size={13} /> Add to tracker
+                      </>
+                    )}
                   </button>
-                  <button onClick={() => downloadDriveIcs(d)} className="text-xs text-muted hover:text-cobalt-dark flex items-center gap-1">
+                  <button
+                    onClick={() => downloadDriveIcs(d)}
+                    className="text-xs text-muted hover:text-cobalt-dark flex items-center gap-1"
+                  >
                     <CalendarPlus size={13} /> Add to calendar
                   </button>
                   {d.url && (
-                    <a href={d.url} target="_blank" rel="noreferrer" className="text-xs text-muted hover:text-cobalt-dark flex items-center gap-1">
+                    <a
+                      href={d.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-muted hover:text-cobalt-dark flex items-center gap-1"
+                    >
                       Details <ExternalLink size={11} />
                     </a>
                   )}
