@@ -1,4 +1,5 @@
 import { Loader2, BookOpen } from 'lucide-react'
+import { PanelSkeleton } from './Skeleton.jsx'
 
 export default function LearningRoadmap({ skillGap, roadmap, loading, onGenerate }) {
   if (!skillGap || skillGap.missing_skills.length === 0) {
@@ -30,6 +31,9 @@ export default function LearningRoadmap({ skillGap, roadmap, loading, onGenerate
         </button>
       </div>
 
+      {loading && !roadmap && (
+        <PanelSkeleton lines={5} note="Building your roadmap from the knowledge base…" />
+      )}
       {roadmap && (
         <div className="space-y-3">
           {roadmap.roadmap.map((item, i) => (

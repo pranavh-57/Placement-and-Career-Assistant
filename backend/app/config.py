@@ -23,7 +23,6 @@ class Settings(BaseSettings):
 
     chroma_persist_dir: str = str(BASE_DIR / "data" / "chroma")
     knowledge_base_dir: str = str(BASE_DIR / "data" / "knowledge_base")
-    uploads_dir: str = str(BASE_DIR / "data" / "uploads")
     seed_on_startup: bool = False
 
     # --- LLM output handling ---
@@ -81,9 +80,5 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-for d in (
-    settings.chroma_persist_dir,
-    settings.knowledge_base_dir,
-    settings.uploads_dir,
-):
+for d in (settings.chroma_persist_dir, settings.knowledge_base_dir):
     Path(d).mkdir(parents=True, exist_ok=True)

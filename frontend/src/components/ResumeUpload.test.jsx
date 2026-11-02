@@ -8,12 +8,14 @@ function setup(overrides = {}) {
     profile: null,
     onUploaded: vi.fn().mockResolvedValue(undefined),
     onError: vi.fn(),
+    onProfileChange: vi.fn(),
     loading: false,
     setLoading: vi.fn(),
     ...overrides,
   }
   const { container } = render(<ResumeUpload {...props} />)
-  return { props, input: container.querySelector('input[type="file"]') }
+  const input = /** @type {HTMLInputElement} */ (container.querySelector('input[type="file"]'))
+  return { props, input }
 }
 
 describe('ResumeUpload', () => {

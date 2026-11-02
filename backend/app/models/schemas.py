@@ -2,14 +2,9 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
-
-
-class RagIngestRequest(BaseModel):
-    text: str = Field(max_length=50_000)
-    source: str = Field(max_length=200)
-    doc_type: str = "user_note"  # ignored; server forces user_note
-
 
 # ---------- Resume / Profile ----------
 
@@ -28,9 +23,6 @@ class StudentProfile(BaseModel):
     projects: list[str] = Field(default_factory=list)
     experience: list[str] = Field(default_factory=list)
     certifications: list[str] = Field(default_factory=list)
-    raw_text: str = Field(
-        default="", exclude=True
-    )  # never serialized to client or prompts
 
 
 class ResumeAnalysisResponse(BaseModel):
@@ -55,6 +47,7 @@ class JobSearchRequest(BaseModel):
     query: str = Field(min_length=1, max_length=200)
     location: str | None = Field(default=None, max_length=100)
     limit: int = Field(default=5, ge=1, le=20)
+    job_type: Literal["any", "internship", "full-time"] = "any"
 
 
 class JobSearchResponse(BaseModel):

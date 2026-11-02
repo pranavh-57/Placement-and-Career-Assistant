@@ -1,7 +1,16 @@
 import { useState, useRef } from 'react'
+import SkillsEditor from './SkillsEditor.jsx'
+import { friendlyError } from '../utils/errors.js'
 import { UploadCloud, CheckCircle2, Loader2 } from 'lucide-react'
 
-export default function ResumeUpload({ profile, onUploaded, onError, loading, setLoading }) {
+export default function ResumeUpload({
+  profile,
+  onUploaded,
+  onError,
+  onProfileChange,
+  loading,
+  setLoading,
+}) {
   const [dragActive, setDragActive] = useState(false)
   const inputRef = useRef(null)
   const ALLOWED = ['.pdf', '.docx', '.txt']
@@ -16,7 +25,7 @@ export default function ResumeUpload({ profile, onUploaded, onError, loading, se
     try {
       await onUploaded(file)
     } catch (err) {
-      onError(err?.response?.data?.detail || 'Failed to analyze resume.')
+      onError(friendlyError(err, 'Failed to analyze resume.'))
     } finally {
       setLoading(false)
     }
@@ -27,8 +36,8 @@ export default function ResumeUpload({ profile, onUploaded, onError, loading, se
       <div>
         <h2 className="font-display text-xl font-semibold">Resume &amp; Profile</h2>
         <p className="text-sm text-muted mt-1">
-          Upload a PDF resume — the Resume Agent extracts skills, education, projects, and
-          experience, then indexes it into the knowledge base for retrieval.
+          Upload your resume (PDF, DOCX, or TXT). The Resume Agent extracts your skills, education,
+          projects, and experience, then indexes it into the knowledge base for retrieval.
         </p>
       </div>
 
@@ -64,14 +73,14 @@ export default function ResumeUpload({ profile, onUploaded, onError, loading, se
             ? 'Resume Agent is extracting your profile…'
             : 'Drop your resume here, or click to browse'}
         </p>
-        <p className="text-xs text-muted mt-1">PDF, DOCX, or TXT only, up to ~10 pages</p>
+        <p className="text-xs text-muted mt-1">PDF, DOCX, or TXT · up to ~10 pages</p>
       </div>
 
       {profile && (
         <div className="panel p-6">
           <div className="flex items-center gap-2 mb-4">
             <CheckCircle2 size={16} className="text-signal-green" />
-            <span className="text-sm font-medium">Profile extracted</span>
+            <span className="text-sm font-medium">Profile saved</span>
           </div>
 
           <div className="grid grid-cols-2 gap-6">
@@ -95,17 +104,10 @@ export default function ResumeUpload({ profile, onUploaded, onError, loading, se
           </div>
 
           <div className="mt-6">
-            <p className="eyebrow mb-2">Skills ({profile.skills?.length || 0})</p>
-            <div className="flex flex-wrap gap-1.5">
-              {profile.skills?.map((s, i) => (
-                <span
-                  key={i}
-                  className="text-xs font-mono px-2 py-1 rounded bg-paper border border-hairline"
-                >
-                  {s}
-                </span>
-              ))}
-            </div>
+            <SkillsEditor
+              skills={profile.skills || []}
+              onChange={(skills) => onProfileChange({ ...profile, skills })}
+            />
           </div>
 
           {profile.projects?.length > 0 && (

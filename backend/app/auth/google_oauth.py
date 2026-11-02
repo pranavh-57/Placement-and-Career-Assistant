@@ -6,15 +6,14 @@ from app.config import settings
 
 def verify_google_id_token(token: str) -> dict:
     """Verify a Google ID token (OIDC JWT) sent from the frontend's Sign-In
-    button, and return its decoded claims (sub, email, name, picture)."""
+    button, and return its decoded claims (sub, email, name, picture).
+
+    verify_oauth2_token already checks the signature, expiry, audience and
+    that the issuer is Google.
+    """
     try:
-        claims = google_id_token.verify_oauth2_token(
+        return google_id_token.verify_oauth2_token(
             token, google_requests.Request(), settings.google_client_id
         )
     except ValueError as exc:
         raise ValueError(f"Invalid Google ID token: {exc}") from exc
-
-    if claims.get("iss") not in ("accounts.google.com", "https://accounts.google.com"):
-        raise ValueError("Invalid token issuer.")
-
-    return claims

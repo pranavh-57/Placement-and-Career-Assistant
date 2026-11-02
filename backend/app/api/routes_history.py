@@ -22,7 +22,10 @@ async def get_history(
 ):
     rows = (
         db.query(UserHistory)
-        .filter(UserHistory.user_id == current_user.id)
+        .filter(
+            UserHistory.user_id == current_user.id,
+            UserHistory.kind == KIND_ANALYSIS,
+        )
         .order_by(UserHistory.created_at.desc())
         .limit(20)
         .all()

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,7 +11,9 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from app.api import (
+    routes_account,
     routes_auth,
+    routes_campus,
     routes_chat,
     routes_github,
     routes_history,
@@ -18,8 +21,9 @@ from app.api import (
     routes_jobs,
     routes_learning,
     routes_matching,
-    routes_rag,
+    routes_profile,
     routes_resume,
+    routes_saved_jobs,
     routes_skills,
 )
 from app.auth.dependencies import get_current_user
@@ -28,6 +32,19 @@ from app.rag.ingest import seed_if_empty
 from app.rate_limit import limiter
 
 logger = logging.getLogger("startup")
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    if not settings.google_api_key:
+        logger.warning("GOOGLE_API_KEY is not set: agent endpoints will fail.")
+    elif settings.seed_on_startup:
+        try:
+            logger.info("KB seed: %s", await asyncio.to_thread(seed_if_empty))
+        except Exception:
+            logger.exception("Knowledge base seeding failed")
+    yield
+
 
 app = FastAPI(
     title="Placement & Career Assistant API",
@@ -55,25 +72,16 @@ app.include_router(routes_skills.router, dependencies=protected)
 app.include_router(routes_learning.router, dependencies=protected)
 app.include_router(routes_interview.router, dependencies=protected)
 app.include_router(routes_chat.router, dependencies=protected)
-app.include_router(routes_rag.router, dependencies=protected)
 app.include_router(routes_github.router, dependencies=protected)
 app.include_router(routes_history.router, dependencies=protected)
+app.include_router(routes_profile.router, dependencies=protected)
+app.include_router(routes_account.router, dependencies=protected)
+app.include_router(routes_saved_jobs.router, dependencies=protected)
+app.include_router(routes_campus.router, dependencies=protected)
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
 app.add_middleware(SlowAPIMiddleware)
-
-
-@app.on_event("startup")
-async def startup() -> None:
-    if not settings.google_api_key:
-        logger.warning("GOOGLE_API_KEY is not set: agent endpoints will fail.")
-        return
-    if settings.seed_on_startup:
-        try:
-            logger.info("KB seed: %s", await asyncio.to_thread(seed_if_empty))
-        except Exception:
-            logger.exception("Knowledge base seeding failed")
 
 
 @app.get("/")

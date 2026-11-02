@@ -13,7 +13,6 @@ venv/
 
 # Runtime data
 data/chroma/
-data/uploads/
 data/*.db
 data/*.sqlite3
 
